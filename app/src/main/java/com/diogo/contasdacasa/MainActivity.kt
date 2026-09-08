@@ -24,7 +24,6 @@ import com.diogo.contasdacasa.ui.bill.BillCreationScreen
 import com.diogo.contasdacasa.ui.bill.BillEditScreen
 import com.diogo.contasdacasa.ui.bill.BillViewModel
 import com.diogo.contasdacasa.ui.bill.PrepareNextMonthScreen
-import com.diogo.contasdacasa.ui.bill.PrepareNextMonthScreen
 import com.diogo.contasdacasa.ui.profile.ProfileCreationScreen
 import com.diogo.contasdacasa.ui.profile.ProfileHomeScreen
 import com.diogo.contasdacasa.ui.profile.ProfileSelectionScreen
@@ -150,21 +149,6 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        selectedProfile != null && isPreparingNextMonth -> {
-                            PrepareNextMonthScreen(
-                                bills = billUiState.bills,
-                                sourceMonth = billUiState.month,
-                                sourceYear = billUiState.year,
-                                isSaving = billUiState.isSaving,
-                                errorMessage = billUiState.errorMessage,
-                                onConfirm = billViewModel::prepareNextMonth,
-                                onCancel = {
-                                    billViewModel.clearFeedback()
-                                    isPreparingNextMonth = false
-                                },
-                                modifier = Modifier.padding(innerPadding)
-                            )
-                        }
                         selectedProfile != null && isPreparingNextMonth -> {
                             PrepareNextMonthScreen(
                                 bills = billUiState.bills,
