@@ -71,8 +71,8 @@ fun ProfileHomeScreen(
         mutableStateOf<Bill?>(null)
     }
 
-    var showBills by remember(month, year) {
-        mutableStateOf(true)
+    var selectedFilter by remember(month, year) {
+        mutableStateOf(BillFilter.ALL)
     }
 
     val monthName = formatMonthName(month)
@@ -87,6 +87,12 @@ fun ProfileHomeScreen(
 
     val pendingInCents = totalInCents - paidInCents
     val paidCount = bills.count { bill -> bill.isPaid }
+
+    val filteredBills = when (selectedFilter) {
+        BillFilter.ALL -> bills
+        BillFilter.PENDING -> bills.filter { bill -> !bill.isPaid }
+        BillFilter.PAID -> bills.filter { bill -> bill.isPaid }
+    }
 
     LazyColumn(
         modifier = modifier
@@ -140,59 +146,77 @@ fun ProfileHomeScreen(
 
         item {
             AccountsSectionHeader(
-                billCount = bills.size,
-                isExpanded = showBills,
-                onToggle = {
-                    showBills = !showBills
+                billCount = filteredBills.size,
+                selectedFilter = selectedFilter,
+                onFilterSelected = { filter ->
+                    selectedFilter = filter
                 }
             )
         }
 
-        if (showBills) {
-            when {
-                isLoading -> {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
+        when {
+            isLoading -> {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
+            }
 
-                bills.isEmpty() -> {
-                    item {
-                        EmptyAccountsCard(
-                            onAddBill = onAddBill
-                        )
-                    }
+            bills.isEmpty() -> {
+                item {
+                    EmptyAccountsCard(
+                        onAddBill = onAddBill
+                    )
                 }
+            }
 
-                else -> {
-                    items(
-                        items = bills,
-                        key = { bill -> bill.id }
-                    ) { bill ->
-                        BillCard(
-                            bill = bill,
-                            onTogglePaid = {
-                                onTogglePaid(bill)
+            filteredBills.isEmpty() -> {
+                item {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = if (selectedFilter == BillFilter.PAID) {
+                                "Nenhuma conta paga neste mês."
+                            } else {
+                                "Nenhuma conta pendente neste mês."
                             },
-                            onEdit = {
-                                onEditBill(bill)
-                            },
-                            onDelete = {
-                                billPendingDeletion = bill
-                            }
+                            modifier = Modifier.padding(20.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyLarge
                         )
                     }
                 }
             }
-        }
 
+            else -> {
+                items(
+                    items = filteredBills,
+                    key = { bill -> bill.id }
+                ) { bill ->
+                    BillCard(
+                        bill = bill,
+                        onTogglePaid = {
+                            onTogglePaid(bill)
+                        },
+                        onEdit = {
+                            onEditBill(bill)
+                        },
+                        onDelete = {
+                            billPendingDeletion = bill
+                        }
+                    )
+                }
+            }
+        }
         item {
             Button(
                 onClick = onAddBill,

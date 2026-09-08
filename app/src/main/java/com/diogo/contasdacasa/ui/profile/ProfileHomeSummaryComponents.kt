@@ -163,13 +163,21 @@ internal fun FinancialSummary(
     paidCount: Int,
     totalCount: Int
 ) {
+    val totalCardColor = when {
+        totalCount == 0 -> Color(0xFFE3F2FD)
+        pendingInCents > 0L -> Color(0xFFFDECEC)
+        else -> Color(0xFFE5F4EA)
+    }
+
+    val totalContentColor = MaterialTheme.colorScheme.onSurface
+
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = totalCardColor
             ),
             shape = RoundedCornerShape(22.dp),
             elevation = CardDefaults.cardElevation(
@@ -182,7 +190,8 @@ internal fun FinancialSummary(
                 Text(
                     text = "Total do mês",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.82f)
+                    fontWeight = FontWeight.Bold,
+                    color = totalContentColor.copy(alpha = 0.78f)
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -190,7 +199,8 @@ internal fun FinancialSummary(
                 Text(
                     text = formatCurrency(totalInCents),
                     style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    fontWeight = FontWeight.Bold,
+                    color = totalContentColor
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -198,7 +208,8 @@ internal fun FinancialSummary(
                 Text(
                     text = "$paidCount de $totalCount contas pagas",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.82f)
+                    fontWeight = FontWeight.Bold,
+                    color = totalContentColor.copy(alpha = 0.78f)
                 )
             }
         }

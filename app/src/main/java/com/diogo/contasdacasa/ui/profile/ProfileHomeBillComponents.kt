@@ -24,6 +24,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -51,24 +53,16 @@ import com.diogo.contasdacasa.ui.util.formatMonthName
 @Composable
 internal fun AccountsSectionHeader(
     billCount: Int,
-    isExpanded: Boolean,
-    onToggle: () -> Unit
+    selectedFilter: BillFilter,
+    onFilterSelected: (BillFilter) -> Unit
 ) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onToggle),
+        modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(
-                horizontal = 16.dp,
-                vertical = 14.dp
-            ),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(14.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -96,19 +90,60 @@ internal fun AccountsSectionHeader(
                 }
             }
 
-            Text(
-                text = if (isExpanded) {
-                    "Ocultar  ↑"
-                } else {
-                    "Ver contas  ↓"
-                },
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelLarge
-            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = selectedFilter == BillFilter.ALL,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        onFilterSelected(BillFilter.ALL)
+                    },
+                    label = {
+                        Text(text = "Todas")
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = Color.White,
+                        selectedContainerColor = Color(0xFFE3F2FD)
+                    )
+                )
+
+                FilterChip(
+                    selected = selectedFilter == BillFilter.PENDING,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        onFilterSelected(BillFilter.PENDING)
+                    },
+                    label = {
+                        Text(text = "Pendentes")
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = Color.White,
+                        selectedContainerColor = Color(0xFFFDECEC)
+                    )
+                )
+
+                FilterChip(
+                    selected = selectedFilter == BillFilter.PAID,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        onFilterSelected(BillFilter.PAID)
+                    },
+                    label = {
+                        Text(text = "Pagas")
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        containerColor = Color.White,
+                        selectedContainerColor = Color(0xFFE5F4EA)
+                    )
+                )
+            }
         }
     }
 }
-
 @Composable
 internal fun BillCard(
     bill: Bill,
@@ -117,7 +152,7 @@ internal fun BillCard(
     onDelete: () -> Unit
 ) {
     val cardColor = if (bill.isPaid) {
-        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+        MaterialTheme.colorScheme.primaryContainer
     } else {
         MaterialTheme.colorScheme.surface
     }
@@ -207,52 +242,60 @@ internal fun BillCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
 
-            Button(
-                onClick = onTogglePaid,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(46.dp),
-                colors = if (bill.isPaid) {
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                } else {
-                    ButtonDefaults.buttonColors()
-                },
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = if (bill.isPaid) {
-                        "Marcar como pendente"
-                    } else {
-                        "Marcar como paga"
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(7.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
-                    onClick = onEdit,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
+                TextButton(
+                    onClick = onEdit
                 ) {
                     Text(text = "Editar")
                 }
 
                 TextButton(
-                    onClick = onDelete,
-                    modifier = Modifier.weight(1f)
+                    onClick = onDelete
                 ) {
                     Text(
                         text = "Excluir",
                         color = MaterialTheme.colorScheme.error
                     )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Surface(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .clickable(
+                            onClickLabel = if (bill.isPaid) {
+                                "Marcar como pendente"
+                            } else {
+                                "Marcar como paga"
+                            },
+                            onClick = onTogglePaid
+                        ),
+                    color = if (bill.isPaid) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+                    shape = CircleShape
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "✓",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = if (bill.isPaid) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onError
+                            }
+                        )
+                    }
                 }
             }
         }
