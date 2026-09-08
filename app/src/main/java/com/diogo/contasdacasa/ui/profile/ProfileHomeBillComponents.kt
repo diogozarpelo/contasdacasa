@@ -1,5 +1,7 @@
 package com.diogo.contasdacasa.ui.profile
 
+import com.diogo.contasdacasa.data.model.BillEntryType
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -186,7 +188,7 @@ internal fun BillCard(
             )
 
             if (
-                bill.entryType == "INSTALLMENT" &&
+                bill.entryType == BillEntryType.INSTALLMENT &&
                 bill.installmentNumber != null &&
                 bill.totalInstallments != null
             ) {

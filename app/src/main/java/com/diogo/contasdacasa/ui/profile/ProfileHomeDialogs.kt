@@ -1,5 +1,7 @@
 package com.diogo.contasdacasa.ui.profile
 
+import com.diogo.contasdacasa.data.model.BillEntryType
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,7 +62,7 @@ internal fun DeleteBillDialog(
         },
         text = {
             Text(
-                text = if (bill.entryType == "INSTALLMENT") {
+                text = if (bill.entryType == BillEntryType.INSTALLMENT) {
                     "Escolha se deseja excluir somente esta parcela ou também as seguintes."
                 } else {
                     "A conta ${bill.name} será excluída deste mês."
@@ -75,7 +77,7 @@ internal fun DeleteBillDialog(
                     onClick = onDeleteBill
                 ) {
                     Text(
-                        text = if (bill.entryType == "INSTALLMENT") {
+                        text = if (bill.entryType == BillEntryType.INSTALLMENT) {
                             "Excluir somente esta parcela"
                         } else {
                             "Excluir"
@@ -84,7 +86,7 @@ internal fun DeleteBillDialog(
                     )
                 }
 
-                if (bill.entryType == "INSTALLMENT") {
+                if (bill.entryType == BillEntryType.INSTALLMENT) {
                     TextButton(
                         onClick = onDeleteInstallmentsFromCurrent
                     ) {

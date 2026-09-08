@@ -1,5 +1,7 @@
 package com.diogo.contasdacasa.data.repository
 
+import com.diogo.contasdacasa.data.model.BillEntryType
+
 import com.diogo.contasdacasa.data.local.BillDao
 import com.diogo.contasdacasa.data.model.Bill
 import java.time.YearMonth
@@ -38,7 +40,7 @@ class BillRepository(
                 dueDay = dueDay,
                 month = installmentMonth.monthValue,
                 year = installmentMonth.year,
-                entryType = "INSTALLMENT",
+                entryType = BillEntryType.INSTALLMENT,
                 installmentGroupId = groupId,
                 installmentNumber = number,
                 totalInstallments = totalInstallments
@@ -60,7 +62,7 @@ class BillRepository(
 
         sourceBills
             .filter { bill ->
-                bill.entryType == "MONTHLY"
+                bill.entryType == BillEntryType.MONTHLY
             }
             .forEach { sourceBill ->
                 val existingCopy = billDao.getCopiedBill(
@@ -89,7 +91,7 @@ class BillRepository(
                             month = targetMonth.monthValue,
                             year = targetMonth.year,
                             requiresReview = !shouldCopyDetails,
-                            entryType = "MONTHLY",
+                            entryType = BillEntryType.MONTHLY,
                             sourceBillId = sourceBill.id
                         )
                     )

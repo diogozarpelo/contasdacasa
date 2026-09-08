@@ -1,5 +1,7 @@
 package com.diogo.contasdacasa.ui.bill
 
+import com.diogo.contasdacasa.data.model.BillEntryType
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +37,7 @@ fun BillCreationScreen(
     modifier: Modifier = Modifier
 ) {
     var entryType by rememberSaveable {
-        mutableStateOf("MONTHLY")
+        mutableStateOf(BillEntryType.MONTHLY)
     }
 
     var name by rememberSaveable {
@@ -58,7 +60,7 @@ fun BillCreationScreen(
         mutableStateOf("")
     }
 
-    val isInstallment = entryType == "INSTALLMENT"
+    val isInstallment = entryType == BillEntryType.INSTALLMENT
 
     val monthName = formatMonthName(uiState.month)
 
@@ -84,11 +86,11 @@ fun BillCreationScreen(
         BillEntryTypeSelector(
             isInstallment = isInstallment,
             onMonthlySelected = {
-                entryType = "MONTHLY"
+                entryType = BillEntryType.MONTHLY
                 onClearFeedback()
             },
             onInstallmentSelected = {
-                entryType = "INSTALLMENT"
+                entryType = BillEntryType.INSTALLMENT
                 onClearFeedback()
             }
         )

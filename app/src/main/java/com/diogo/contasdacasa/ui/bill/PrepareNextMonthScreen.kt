@@ -1,5 +1,7 @@
 package com.diogo.contasdacasa.ui.bill
 
+import com.diogo.contasdacasa.data.model.BillEntryType
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -39,7 +41,7 @@ fun PrepareNextMonthScreen(
     modifier: Modifier = Modifier
 ) {
     val monthlyBills = bills.filter { bill ->
-        bill.entryType == "MONTHLY"
+        bill.entryType == BillEntryType.MONTHLY
     }
 
     var selectedIds by remember(

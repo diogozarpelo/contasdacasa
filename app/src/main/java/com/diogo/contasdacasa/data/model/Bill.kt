@@ -35,7 +35,7 @@ data class Bill(
     @ColumnInfo(defaultValue = "0")
     val requiresReview: Boolean = false,
     @ColumnInfo(defaultValue = "'MONTHLY'")
-    val entryType: String = "MONTHLY",
+    val entryType: String = BillEntryType.MONTHLY,
     val installmentGroupId: String? = null,
     val installmentNumber: Int? = null,
     val totalInstallments: Int? = null,

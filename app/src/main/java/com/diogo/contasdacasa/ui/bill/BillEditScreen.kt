@@ -1,5 +1,7 @@
 package com.diogo.contasdacasa.ui.bill
 
+import com.diogo.contasdacasa.data.model.BillEntryType
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +58,7 @@ fun BillEditScreen(
         )
     }
 
-    val isInstallment = bill.entryType == "INSTALLMENT"
+    val isInstallment = bill.entryType == BillEntryType.INSTALLMENT
 
     Column(
         modifier = modifier

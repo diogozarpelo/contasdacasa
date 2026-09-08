@@ -1,5 +1,7 @@
 package com.diogo.contasdacasa.ui.profile
 
+import com.diogo.contasdacasa.data.model.BillEntryType
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -213,7 +215,7 @@ fun ProfileHomeScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 enabled = bills.any { bill ->
-                    bill.entryType == "MONTHLY"
+                    bill.entryType == BillEntryType.MONTHLY
                 },
                 shape = RoundedCornerShape(14.dp)
             ) {
