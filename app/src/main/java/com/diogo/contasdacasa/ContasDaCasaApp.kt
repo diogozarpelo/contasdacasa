@@ -47,18 +47,9 @@ val profileViewModel: ProfileViewModel = viewModel(
             val profileUiState = profileViewModel.uiState
             val billUiState = billViewModel.uiState
 
-            var isCreatingProfile by rememberSaveable {
-                mutableStateOf(false)
+            var destination by rememberSaveable {
+                mutableStateOf(AppDestination.HOME)
             }
-
-            var isCreatingBill by rememberSaveable {
-                mutableStateOf(false)
-            }
-
-            var isPreparingNextMonth by rememberSaveable {
-                mutableStateOf(false)
-            }
-
             var editingBillId by rememberSaveable {
                 mutableStateOf<Long?>(null)
             }
@@ -80,7 +71,7 @@ val profileViewModel: ProfileViewModel = viewModel(
             LaunchedEffect(profileUiState.createdProfileId) {
                 profileUiState.createdProfileId?.let { profileId ->
                     selectedProfileId = profileId
-                    isCreatingProfile = false
+                    destination = AppDestination.HOME
                     profileViewModel.clearFeedback()
                 }
             }
@@ -93,7 +84,7 @@ val profileViewModel: ProfileViewModel = viewModel(
 
             LaunchedEffect(billUiState.wasBillCreated) {
                 if (billUiState.wasBillCreated) {
-                    isCreatingBill = false
+                    destination = AppDestination.HOME
                     billViewModel.clearFeedback()
                 }
             }
@@ -101,14 +92,14 @@ val profileViewModel: ProfileViewModel = viewModel(
 
             LaunchedEffect(billUiState.wasNextMonthPrepared) {
                 if (billUiState.wasNextMonthPrepared) {
-                    isPreparingNextMonth = false
+                    destination = AppDestination.HOME
                     billViewModel.clearFeedback()
                 }
             }
 
             LaunchedEffect(billUiState.wasNextMonthPrepared) {
                 if (billUiState.wasNextMonthPrepared) {
-                    isPreparingNextMonth = false
+                    destination = AppDestination.HOME
                     billViewModel.clearFeedback()
                 }
             }
@@ -135,7 +126,7 @@ val profileViewModel: ProfileViewModel = viewModel(
                             }
                         }
 
-                        selectedProfile != null && isPreparingNextMonth -> {
+                        selectedProfile != null && destination == AppDestination.PREPARE_NEXT_MONTH -> {
                             PrepareNextMonthScreen(
                                 bills = billUiState.bills,
                                 sourceMonth = billUiState.month,
@@ -145,12 +136,14 @@ val profileViewModel: ProfileViewModel = viewModel(
                                 onConfirm = billViewModel::prepareNextMonth,
                                 onCancel = {
                                     billViewModel.clearFeedback()
-                                    isPreparingNextMonth = false
+                                    destination = AppDestination.HOME
                                 },
                                 modifier = Modifier.padding(innerPadding)
                             )
                         }
-                        selectedProfile != null && editingBill != null -> {
+                        selectedProfile != null &&
+                            destination == AppDestination.EDIT_BILL &&
+                            editingBill != null -> {
                             BillEditScreen(
                                 bill = editingBill,
                                 uiState = billUiState,
@@ -165,7 +158,7 @@ val profileViewModel: ProfileViewModel = viewModel(
                             )
                         }
 
-                        selectedProfile != null && isCreatingBill -> {
+                        selectedProfile != null && destination == AppDestination.CREATE_BILL -> {
                             BillCreationScreen(
                                 uiState = billUiState,
                                 onCreateMonthlyBill = { name, amount, dueDay ->
@@ -179,7 +172,7 @@ val profileViewModel: ProfileViewModel = viewModel(
                                 onClearFeedback = billViewModel::clearFeedback,
                                 onCancel = {
                                     billViewModel.clearFeedback()
-                                    isCreatingBill = false
+                                    destination = AppDestination.HOME
                                 },
                                 modifier = Modifier.padding(innerPadding)
                             )
@@ -201,23 +194,24 @@ val profileViewModel: ProfileViewModel = viewModel(
                                 },
                                 onPrepareNextMonth = {
                                     billViewModel.clearFeedback()
-                                    isPreparingNextMonth = true
+                                    destination = AppDestination.PREPARE_NEXT_MONTH
                                 },
                                 onAddBill = {
                                     billViewModel.clearFeedback()
-                                    isCreatingBill = true
+                                    destination = AppDestination.CREATE_BILL
                                 },
                                 onEditBill = { bill ->
                                     billViewModel.clearFeedback()
                                     editingBillId = bill.id
+                                    destination = AppDestination.EDIT_BILL
                                 },
                                 onTogglePaid = billViewModel::togglePaid,
                                 onDeleteBill = billViewModel::deleteBill,
                                 onDeleteInstallmentsFromCurrent =
                                     billViewModel::deleteInstallmentsFromCurrent,
                                 onChangeProfile = {
-                                    isCreatingBill = false
-                                    isPreparingNextMonth = false
+                                    destination = AppDestination.HOME
+                                    destination = AppDestination.HOME
                                     editingBillId = null
                                     selectedProfileId = null
                                 },
@@ -225,7 +219,8 @@ val profileViewModel: ProfileViewModel = viewModel(
                             )
                         }
 
-                        isCreatingProfile || profileUiState.profiles.isEmpty() -> {
+                        destination == AppDestination.CREATE_PROFILE ||
+                            profileUiState.profiles.isEmpty() -> {
                             ProfileCreationScreen(
                                 uiState = profileUiState,
                                 onCreateProfile = profileViewModel::createProfile,
@@ -233,7 +228,7 @@ val profileViewModel: ProfileViewModel = viewModel(
                                 onCancel = if (profileUiState.profiles.isNotEmpty()) {
                                     {
                                         profileViewModel.clearFeedback()
-                                        isCreatingProfile = false
+                                        destination = AppDestination.HOME
                                     }
                                 } else {
                                     null
@@ -252,7 +247,7 @@ val profileViewModel: ProfileViewModel = viewModel(
                                 },
                                 onCreateProfile = {
                                     profileViewModel.clearFeedback()
-                                    isCreatingProfile = true
+                                    destination = AppDestination.CREATE_PROFILE
                                 },
                                 onRenameProfile = profileViewModel::renameProfile,
                                 onDeleteProfile = profileViewModel::deleteProfile,
