@@ -28,8 +28,10 @@ import com.diogo.contasdacasa.ui.profile.ProfileCreationScreen
 import com.diogo.contasdacasa.ui.profile.ProfileHomeScreen
 import com.diogo.contasdacasa.ui.profile.ProfileSelectionScreen
 import com.diogo.contasdacasa.ui.profile.ProfileViewModel
+import com.diogo.contasdacasa.ui.splash.BrandedSplashScreen
 import com.diogo.contasdacasa.ui.theme.ContasDaCasaTheme
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun ContasDaCasaApp(
@@ -58,7 +60,16 @@ val profileViewModel: ProfileViewModel = viewModel(
                 mutableStateOf<Long?>(null)
             }
 
+            var isShowingBrandSplash by rememberSaveable {
+                mutableStateOf(true)
+            }
 
+
+
+            LaunchedEffect(Unit) {
+                delay(3000L)
+                isShowingBrandSplash = false
+            }
 
             val selectedProfile = profileUiState.profiles.firstOrNull { profile ->
                 profile.id == selectedProfileId
@@ -97,12 +108,6 @@ val profileViewModel: ProfileViewModel = viewModel(
                 }
             }
 
-            LaunchedEffect(billUiState.wasNextMonthPrepared) {
-                if (billUiState.wasNextMonthPrepared) {
-                    destination = AppDestination.HOME
-                    billViewModel.clearFeedback()
-                }
-            }
             LaunchedEffect(billUiState.wasBillUpdated) {
                 if (billUiState.wasBillUpdated) {
                     editingBillId = null
@@ -111,7 +116,10 @@ val profileViewModel: ProfileViewModel = viewModel(
             }
 
             ContasDaCasaTheme {
-                Scaffold(
+                if (isShowingBrandSplash) {
+                    BrandedSplashScreen()
+                } else {
+                    Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
                     when {
@@ -211,7 +219,6 @@ val profileViewModel: ProfileViewModel = viewModel(
                                     billViewModel::deleteInstallmentsFromCurrent,
                                 onChangeProfile = {
                                     destination = AppDestination.HOME
-                                    destination = AppDestination.HOME
                                     editingBillId = null
                                     selectedProfileId = null
                                 },
@@ -257,5 +264,7 @@ val profileViewModel: ProfileViewModel = viewModel(
                     }
                 }
 
+
+                }
             }
 }
