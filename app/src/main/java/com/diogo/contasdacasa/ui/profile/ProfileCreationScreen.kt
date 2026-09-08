@@ -24,14 +24,13 @@ import com.diogo.contasdacasa.ui.theme.ContasDaCasaTheme
 
 @Composable
 fun ProfileCreationScreen(
+    uiState: ProfileUiState,
+    onCreateProfile: (String) -> Unit,
+    onClearFeedback: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var name by rememberSaveable {
         mutableStateOf("")
-    }
-
-    var createdProfileName by rememberSaveable {
-        mutableStateOf<String?>(null)
     }
 
     Column(
@@ -59,33 +58,51 @@ fun ProfileCreationScreen(
             value = name,
             onValueChange = { newName ->
                 name = newName
-                createdProfileName = null
+                onClearFeedback()
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
                 Text(text = "Como podemos chamar você?")
             },
-            singleLine = true
+            singleLine = true,
+            enabled = !uiState.isSaving
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                createdProfileName = name.trim()
+                onCreateProfile(name)
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = name.isNotBlank()
+            enabled = name.isNotBlank() && !uiState.isSaving
         ) {
-            Text(text = "Criar meu perfil")
+            Text(
+                text = if (uiState.isSaving) {
+                    "Criando perfil..."
+                } else {
+                    "Criar meu perfil"
+                }
+            )
         }
 
-        createdProfileName?.let { profileName ->
+        uiState.createdProfileName?.let { profileName ->
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = "Perfil de $profileName criado com sucesso!",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        uiState.errorMessage?.let { message ->
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error
             )
         }
 
@@ -102,6 +119,10 @@ fun ProfileCreationScreen(
 @Composable
 private fun ProfileCreationScreenPreview() {
     ContasDaCasaTheme {
-        ProfileCreationScreen()
+        ProfileCreationScreen(
+            uiState = ProfileUiState(),
+            onCreateProfile = {},
+            onClearFeedback = {}
+        )
     }
 }
