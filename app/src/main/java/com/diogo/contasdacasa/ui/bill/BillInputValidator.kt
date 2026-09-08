@@ -51,4 +51,18 @@ object BillInputValidator {
             else -> null
         }
     }
+    fun validateBillDetails(
+        amountInCents: Long?,
+        dueDay: Int?
+    ): String? {
+        return when {
+            amountInCents == null || amountInCents <= 0 ->
+                "Informe um valor válido."
+
+            dueDay == null || dueDay !in 1..31 ->
+                "Informe um vencimento entre 1 e 31."
+
+            else -> null
+        }
+    }
 }

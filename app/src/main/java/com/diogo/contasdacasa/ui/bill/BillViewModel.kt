@@ -245,18 +245,15 @@ class BillViewModel(
         val amountInCents = parseCurrencyToCents(amountText)
         val dueDay = dueDayText.toIntOrNull()
 
-        when {
-            amountInCents == null || amountInCents <= 0 -> {
-                showError("Informe um valor válido.")
-                return
-            }
+        val validationError = BillInputValidator.validateBillDetails(
+            amountInCents = requireNotNull(amountInCents),
+            dueDay = dueDay
+        )
 
-            dueDay == null || dueDay !in 1..31 -> {
-                showError("Informe um vencimento entre 1 e 31.")
-                return
-            }
+        if (validationError != null) {
+            showError(validationError)
+            return
         }
-
         viewModelScope.launch {
             uiState = uiState.copy(
                 isSaving = true,
@@ -267,8 +264,8 @@ class BillViewModel(
             try {
                 repository.updateBill(
                     bill.copy(
-                        amountInCents = amountInCents,
-                        dueDay = dueDay,
+                        amountInCents = requireNotNull(amountInCents),
+                        dueDay = requireNotNull(dueDay),
                         requiresReview = false
                     )
                 )
@@ -303,18 +300,15 @@ class BillViewModel(
         val amountInCents = parseCurrencyToCents(amountText)
         val dueDay = dueDayText.toIntOrNull()
 
-        when {
-            amountInCents == null || amountInCents <= 0 -> {
-                showError("Informe um valor válido.")
-                return
-            }
+        val validationError = BillInputValidator.validateBillDetails(
+            amountInCents = requireNotNull(amountInCents),
+            dueDay = requireNotNull(dueDay)
+        )
 
-            dueDay == null || dueDay !in 1..31 -> {
-                showError("Informe um vencimento entre 1 e 31.")
-                return
-            }
+        if (validationError != null) {
+            showError(validationError)
+            return
         }
-
         viewModelScope.launch {
             uiState = uiState.copy(
                 isSaving = true,
@@ -325,8 +319,8 @@ class BillViewModel(
             try {
                 repository.updateInstallmentsFromCurrent(
                     bill = bill,
-                    amountInCents = amountInCents,
-                    dueDay = dueDay
+                    amountInCents = requireNotNull(amountInCents),
+                    dueDay = requireNotNull(dueDay)
                 )
 
                 reloadCurrentMonthAfterChange(
