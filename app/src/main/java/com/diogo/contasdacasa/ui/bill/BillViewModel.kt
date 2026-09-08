@@ -8,8 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.diogo.contasdacasa.data.model.Bill
 import com.diogo.contasdacasa.data.repository.BillRepository
-import java.math.BigDecimal
-import java.math.RoundingMode
+import com.diogo.contasdacasa.ui.util.parseCurrencyToCents
 import java.time.YearMonth
 import kotlinx.coroutines.launch
 
@@ -74,7 +73,7 @@ class BillViewModel(
     ) {
         val profileId = uiState.profileId ?: return
         val normalizedName = name.trim()
-        val amountInCents = parseAmountInCents(amountText)
+        val amountInCents = parseCurrencyToCents(amountText)
         val dueDay = dueDayText.toIntOrNull()
 
         when {
@@ -144,7 +143,7 @@ class BillViewModel(
     ) {
         val profileId = uiState.profileId ?: return
         val normalizedName = name.trim()
-        val amountInCents = parseAmountInCents(amountText)
+        val amountInCents = parseCurrencyToCents(amountText)
         val dueDay = dueDayText.toIntOrNull()
         val currentInstallment = currentInstallmentText.toIntOrNull()
         val totalInstallments = totalInstallmentsText.toIntOrNull()
@@ -271,7 +270,7 @@ class BillViewModel(
         amountText: String,
         dueDayText: String
     ) {
-        val amountInCents = parseAmountInCents(amountText)
+        val amountInCents = parseCurrencyToCents(amountText)
         val dueDay = dueDayText.toIntOrNull()
 
         when {
@@ -329,7 +328,7 @@ class BillViewModel(
         amountText: String,
         dueDayText: String
     ) {
-        val amountInCents = parseAmountInCents(amountText)
+        val amountInCents = parseCurrencyToCents(amountText)
         val dueDay = dueDayText.toIntOrNull()
 
         when {
@@ -470,30 +469,6 @@ class BillViewModel(
             wasBillCreated = false,
             errorMessage = message
         )
-    }
-
-    private fun parseAmountInCents(value: String): Long? {
-        return try {
-            val cleanedValue = value
-                .trim()
-                .replace("R$", "")
-                .replace(" ", "")
-
-            val normalizedValue = if (cleanedValue.contains(",")) {
-                cleanedValue
-                    .replace(".", "")
-                    .replace(",", ".")
-            } else {
-                cleanedValue
-            }
-
-            BigDecimal(normalizedValue)
-                .setScale(2, RoundingMode.HALF_UP)
-                .movePointRight(2)
-                .longValueExact()
-        } catch (_: Exception) {
-            null
-        }
     }
 
     class Factory(
