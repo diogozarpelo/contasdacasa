@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="Theme.ContasDaCasa" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">@color/house_green</item>
+        <item name="android:navigationBarColor">@color/house_cream</item>
+        <item name="android:statusBarColor">@color/house_green</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
 
-    <style name="Theme.ContasDaCasa" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.ContasDaCasa.Starting" parent="Theme.ContasDaCasa">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowDisablePreview">false</item>
+    </style>
 </resources>

@@ -82,6 +82,8 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf<Long?>(null)
             }
 
+
+
             val selectedProfile = profileUiState.profiles.firstOrNull { profile ->
                 profile.id == selectedProfileId
             }
@@ -289,6 +291,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+
             }
         }
     }
