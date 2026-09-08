@@ -1,30 +1,42 @@
-<h1 align="center">Contas da Casa</h1>
+# Contas da Casa
 
 <p align="center">
   Aplicativo Android para organizar contas mensais, pagamentos e financiamentos de forma simples e visual.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Kotlin-Android-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin">
-  <img src="https://img.shields.io/badge/Jetpack-Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose">
-  <img src="https://img.shields.io/badge/Material-3-176B57?style=for-the-badge&logo=materialdesign&logoColor=white" alt="Material 3">
-  <img src="https://img.shields.io/badge/Room-Local%20Database-0F4C3A?style=for-the-badge&logo=sqlite&logoColor=white" alt="Room">
+  <img src="https://img.shields.io/badge/Kotlin-Android-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin">
+  <img src="https://img.shields.io/badge/Jetpack-Compose-4285F4?logo=jetpackcompose&logoColor=white" alt="Jetpack Compose">
+  <img src="https://img.shields.io/badge/Material-3-176B57?logo=materialdesign&logoColor=white" alt="Material 3">
+  <img src="https://img.shields.io/badge/Room-Local-003B57?logo=sqlite&logoColor=white" alt="Room">
+  <img src="https://img.shields.io/badge/Android-Native-3DDC84?logo=android&logoColor=white" alt="Android">
 </p>
 
 ## Demonstração visual
 
-<p align="center">
-  <img src="docs/screenshots/01-profile-selection.png" width="230" alt="Seleção de perfil">
-  &nbsp;&nbsp;
-  <img src="docs/screenshots/02-month-overview.png" width="230" alt="Resumo das contas do mês">
-</p>
+### Seleção de perfil
 
 <p align="center">
-  <img src="docs/screenshots/03-new-bill.png" width="230" alt="Cadastro de lançamento">
-  &nbsp;&nbsp;
-  <img src="docs/screenshots/04-next-month.png" width="230" alt="Preparação do próximo mês">
+  <img src="docs/screenshots/01-profile-selection.png" alt="Seleção de perfil no Contas da Casa" width="320">
 </p>
 
+### Resumo mensal
+
+<p align="center">
+  <img src="docs/screenshots/02-month-overview.png" alt="Resumo mensal e contas cadastradas" width="320">
+</p>
+
+### Cadastro de lançamento
+
+<p align="center">
+  <img src="docs/screenshots/03-new-bill.png" alt="Cadastro de conta ou financiamento" width="320">
+</p>
+
+### Preparação do próximo mês
+
+<p align="center">
+  <img src="docs/screenshots/04-next-month.png" alt="Seleção de contas para o próximo mês" width="320">
+</p>
 ## Sobre o projeto
 
 O **Contas da Casa** é um aplicativo Android nativo desenvolvido para facilitar o controle das despesas domésticas.
