@@ -1,13 +1,12 @@
 package com.diogo.contasdacasa.data.model
 
-import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 
 @Entity(
-    tableName = "bills",
+    tableName = "recurring_bill_series",
     foreignKeys = [
         ForeignKey(
             entity = Profile::class,
@@ -17,22 +16,18 @@ import androidx.room3.PrimaryKey
         )
     ],
     indices = [
-        Index(value = ["profileId"]),
-        Index(value = ["recurringSeriesId"])
+        Index(value = ["profileId"])
     ]
 )
-data class Bill(
+data class RecurringBillSeries(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val profileId: Long,
     val name: String,
     val amountInCents: Long,
     val dueDay: Int,
-    val month: Int,
-    val year: Int,
-    val isPaid: Boolean = false,
-    val isRecurring: Boolean = false,
-    val recurringSeriesId: Long? = null,
-    @ColumnInfo(defaultValue = "0")
-    val isExcluded: Boolean = false
+    val startMonth: Int,
+    val startYear: Int,
+    val endMonth: Int? = null,
+    val endYear: Int? = null
 )
