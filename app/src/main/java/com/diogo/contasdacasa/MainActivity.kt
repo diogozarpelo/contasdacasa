@@ -274,6 +274,8 @@ class MainActivity : ComponentActivity() {
                         else -> {
                             ProfileSelectionScreen(
                                 profiles = profileUiState.profiles,
+                                isSaving = profileUiState.isSaving,
+                                errorMessage = profileUiState.errorMessage,
                                 onProfileSelected = { profileId ->
                                     selectedProfileId = profileId
                                 },
@@ -281,6 +283,8 @@ class MainActivity : ComponentActivity() {
                                     profileViewModel.clearFeedback()
                                     isCreatingProfile = true
                                 },
+                                onRenameProfile = profileViewModel::renameProfile,
+                                onDeleteProfile = profileViewModel::deleteProfile,
                                 modifier = Modifier.padding(innerPadding)
                             )
                         }

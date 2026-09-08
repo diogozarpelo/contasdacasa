@@ -21,6 +21,16 @@ class ProfileRepository(
         return profileDao.getById(id)
     }
 
+    suspend fun renameProfile(
+        id: Long,
+        name: String
+    ) {
+        profileDao.updateName(
+            id = id,
+            name = name.trim()
+        )
+    }
+
     suspend fun deleteProfile(id: Long) {
         profileDao.deleteById(id)
     }

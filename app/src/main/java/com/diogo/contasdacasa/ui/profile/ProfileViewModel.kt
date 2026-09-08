@@ -38,11 +38,13 @@ class ProfileViewModel(
                 uiState = uiState.copy(
                     profiles = profiles,
                     isLoading = false,
+                    isSaving = false,
                     errorMessage = null
                 )
             } catch (_: Exception) {
                 uiState = uiState.copy(
                     isLoading = false,
+                    isSaving = false,
                     errorMessage = "Não foi possível carregar os perfis."
                 )
             }
@@ -78,6 +80,61 @@ class ProfileViewModel(
                 uiState = uiState.copy(
                     isSaving = false,
                     errorMessage = "Não foi possível criar o perfil."
+                )
+            }
+        }
+    }
+
+    fun renameProfile(
+        profile: Profile,
+        newName: String
+    ) {
+        val normalizedName = newName.trim()
+
+        if (normalizedName.isBlank() || uiState.isSaving) {
+            return
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                isSaving = true,
+                errorMessage = null
+            )
+
+            try {
+                repository.renameProfile(
+                    id = profile.id,
+                    name = normalizedName
+                )
+
+                loadProfiles()
+            } catch (_: Exception) {
+                uiState = uiState.copy(
+                    isSaving = false,
+                    errorMessage = "Não foi possível renomear o perfil."
+                )
+            }
+        }
+    }
+
+    fun deleteProfile(profile: Profile) {
+        if (uiState.isSaving) {
+            return
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                isSaving = true,
+                errorMessage = null
+            )
+
+            try {
+                repository.deleteProfile(profile.id)
+                loadProfiles()
+            } catch (_: Exception) {
+                uiState = uiState.copy(
+                    isSaving = false,
+                    errorMessage = "Não foi possível excluir o perfil."
                 )
             }
         }
