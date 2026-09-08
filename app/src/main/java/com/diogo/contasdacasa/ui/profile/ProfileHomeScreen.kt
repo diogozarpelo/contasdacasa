@@ -46,6 +46,7 @@ fun ProfileHomeScreen(
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onAddBill: () -> Unit,
+    onEditBill: (Bill) -> Unit,
     onTogglePaid: (Bill) -> Unit,
     onDeleteBill: (Bill) -> Unit,
     onChangeProfile: () -> Unit,
@@ -183,17 +184,40 @@ fun ProfileHomeScreen(
                                         )
 
                                         Text(
-                                            text = formatCurrency(bill.amountInCents)
+                                            text = if (bill.amountInCents == 0L) {
+                                                "Valor não informado"
+                                            } else {
+                                                formatCurrency(bill.amountInCents)
+                                            },
+                                            color = if (bill.amountInCents == 0L) {
+                                                MaterialTheme.colorScheme.error
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurface
+                                            }
                                         )
 
                                         Text(
-                                            text = "Vence no dia ${bill.dueDay}"
+                                            text = if (bill.dueDay == 0) {
+                                                "Vencimento não informado"
+                                            } else {
+                                                "Vence no dia ${bill.dueDay}"
+                                            },
+                                            color = if (bill.dueDay == 0) {
+                                                MaterialTheme.colorScheme.error
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurface
+                                            }
                                         )
 
-                                        if (bill.isRecurring) {
+                                        if (
+                                            bill.entryType == "INSTALLMENT" &&
+                                            bill.installmentNumber != null &&
+                                            bill.totalInstallments != null
+                                        ) {
                                             Text(
-                                                text = "Conta recorrente",
-                                                style = MaterialTheme.typography.bodySmall
+                                                text = "Parcela ${bill.installmentNumber} de ${bill.totalInstallments}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.primary
                                             )
                                         }
                                     }
@@ -206,12 +230,22 @@ fun ProfileHomeScreen(
                                     )
                                 }
 
-                                TextButton(
-                                    onClick = {
-                                        billPendingDeletion = bill
+                                Row {
+                                    TextButton(
+                                        onClick = {
+                                            onEditBill(bill)
+                                        }
+                                    ) {
+                                        Text(text = "Editar")
                                     }
-                                ) {
-                                    Text(text = "Excluir")
+
+                                    TextButton(
+                                        onClick = {
+                                            billPendingDeletion = bill
+                                        }
+                                    ) {
+                                        Text(text = "Excluir")
+                                    }
                                 }
                             }
                         }
@@ -245,10 +279,16 @@ fun ProfileHomeScreen(
                 billPendingDeletion = null
             },
             title = {
-                Text(text = "Excluir conta?")
+                Text(text = "Excluir lançamento?")
             },
             text = {
-                Text(text = "A conta ${bill.name} será excluída deste mês.")
+                Text(
+                    text = if (bill.entryType == "INSTALLMENT") {
+                        "A parcela ${bill.installmentNumber} de ${bill.totalInstallments} será excluída somente deste mês."
+                    } else {
+                        "A conta ${bill.name} será excluída deste mês."
+                    }
+                )
             },
             confirmButton = {
                 TextButton(
@@ -272,7 +312,6 @@ fun ProfileHomeScreen(
         )
     }
 }
-
 private fun formatCurrency(amountInCents: Long): String {
     val amount = BigDecimal(amountInCents).movePointLeft(2)
 

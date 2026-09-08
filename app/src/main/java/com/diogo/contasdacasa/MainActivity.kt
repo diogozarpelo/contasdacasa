@@ -21,6 +21,7 @@ import com.diogo.contasdacasa.data.local.AppDatabase
 import com.diogo.contasdacasa.data.repository.BillRepository
 import com.diogo.contasdacasa.data.repository.ProfileRepository
 import com.diogo.contasdacasa.ui.bill.BillCreationScreen
+import com.diogo.contasdacasa.ui.bill.BillEditScreen
 import com.diogo.contasdacasa.ui.bill.BillViewModel
 import com.diogo.contasdacasa.ui.profile.ProfileCreationScreen
 import com.diogo.contasdacasa.ui.profile.ProfileHomeScreen
@@ -67,12 +68,20 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(false)
             }
 
+            var editingBillId by rememberSaveable {
+                mutableStateOf<Long?>(null)
+            }
+
             var selectedProfileId by rememberSaveable {
                 mutableStateOf<Long?>(null)
             }
 
             val selectedProfile = profileUiState.profiles.firstOrNull { profile ->
                 profile.id == selectedProfileId
+            }
+
+            val editingBill = billUiState.bills.firstOrNull { bill ->
+                bill.id == editingBillId
             }
 
             LaunchedEffect(profileUiState.createdProfileId) {
@@ -96,6 +105,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            LaunchedEffect(billUiState.wasBillUpdated) {
+                if (billUiState.wasBillUpdated) {
+                    editingBillId = null
+                    billViewModel.clearFeedback()
+                }
+            }
+
             ContasDaCasaTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
@@ -112,10 +128,32 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
+                        selectedProfile != null && editingBill != null -> {
+                            BillEditScreen(
+                                bill = editingBill,
+                                uiState = billUiState,
+                                onSave = billViewModel::updateBillDetails,
+                                onClearFeedback = billViewModel::clearFeedback,
+                                onCancel = {
+                                    billViewModel.clearFeedback()
+                                    editingBillId = null
+                                },
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
+
                         selectedProfile != null && isCreatingBill -> {
                             BillCreationScreen(
                                 uiState = billUiState,
-                                onCreateBill = billViewModel::createBill,
+                                onCreateMonthlyBill = { name, amount, dueDay ->
+                                    billViewModel.createBill(
+                                        name = name,
+                                        amountText = amount,
+                                        dueDayText = dueDay,
+                                        isRecurring = false
+                                    )
+                                },
+                                onCreateInstallmentPlan = billViewModel::createInstallmentPlan,
                                 onClearFeedback = billViewModel::clearFeedback,
                                 onCancel = {
                                     billViewModel.clearFeedback()
@@ -143,10 +181,15 @@ class MainActivity : ComponentActivity() {
                                     billViewModel.clearFeedback()
                                     isCreatingBill = true
                                 },
+                                onEditBill = { bill ->
+                                    billViewModel.clearFeedback()
+                                    editingBillId = bill.id
+                                },
                                 onTogglePaid = billViewModel::togglePaid,
                                 onDeleteBill = billViewModel::deleteBill,
                                 onChangeProfile = {
                                     isCreatingBill = false
+                                    editingBillId = null
                                     selectedProfileId = null
                                 },
                                 modifier = Modifier.padding(innerPadding)

@@ -18,7 +18,8 @@ import androidx.room3.PrimaryKey
     ],
     indices = [
         Index(value = ["profileId"]),
-        Index(value = ["recurringSeriesId"])
+        Index(value = ["installmentGroupId"]),
+        Index(value = ["sourceBillId"])
     ]
 )
 data class Bill(
@@ -31,8 +32,12 @@ data class Bill(
     val month: Int,
     val year: Int,
     val isPaid: Boolean = false,
-    val isRecurring: Boolean = false,
-    val recurringSeriesId: Long? = null,
     @ColumnInfo(defaultValue = "0")
-    val isExcluded: Boolean = false
+    val requiresReview: Boolean = false,
+    @ColumnInfo(defaultValue = "'MONTHLY'")
+    val entryType: String = "MONTHLY",
+    val installmentGroupId: String? = null,
+    val installmentNumber: Int? = null,
+    val totalInstallments: Int? = null,
+    val sourceBillId: Long? = null
 )

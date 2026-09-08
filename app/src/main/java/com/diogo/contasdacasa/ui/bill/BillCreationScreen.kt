@@ -1,6 +1,6 @@
 package com.diogo.contasdacasa.ui.bill
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,11 +31,22 @@ import java.util.Locale
 @Composable
 fun BillCreationScreen(
     uiState: BillUiState,
-    onCreateBill: (String, String, String, Boolean) -> Unit,
+    onCreateMonthlyBill: (String, String, String) -> Unit,
+    onCreateInstallmentPlan: (
+        String,
+        String,
+        String,
+        String,
+        String
+    ) -> Unit,
     onClearFeedback: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var entryType by rememberSaveable {
+        mutableStateOf("MONTHLY")
+    }
+
     var name by rememberSaveable {
         mutableStateOf("")
     }
@@ -48,9 +59,15 @@ fun BillCreationScreen(
         mutableStateOf("")
     }
 
-    var isRecurring by rememberSaveable {
-        mutableStateOf(false)
+    var currentInstallment by rememberSaveable {
+        mutableStateOf("")
     }
+
+    var totalInstallments by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    val isInstallment = entryType == "INSTALLMENT"
 
     val monthName = Month
         .of(uiState.month)
@@ -62,22 +79,68 @@ fun BillCreationScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center
+            .padding(24.dp)
     ) {
         Text(
-            text = "Nova conta",
+            text = "Novo lançamento",
             style = MaterialTheme.typography.headlineLarge
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = "$monthName de ${uiState.year}",
             style = MaterialTheme.typography.bodyLarge
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Tipo de lançamento",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    entryType = "MONTHLY"
+                    onClearFeedback()
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RadioButton(
+                selected = !isInstallment,
+                onClick = {
+                    entryType = "MONTHLY"
+                    onClearFeedback()
+                }
+            )
+
+            Text(text = "Conta mensal")
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    entryType = "INSTALLMENT"
+                    onClearFeedback()
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RadioButton(
+                selected = isInstallment,
+                onClick = {
+                    entryType = "INSTALLMENT"
+                    onClearFeedback()
+                }
+            )
+
+            Text(text = "Empréstimo ou financiamento")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
             value = name,
@@ -87,13 +150,19 @@ fun BillCreationScreen(
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
-                Text(text = "Nome da conta")
+                Text(
+                    text = if (isInstallment) {
+                        "Nome do financiamento"
+                    } else {
+                        "Nome da conta"
+                    }
+                )
             },
             singleLine = true,
             enabled = !uiState.isSaving
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = amount,
@@ -103,7 +172,13 @@ fun BillCreationScreen(
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
-                Text(text = "Valor (R$)")
+                Text(
+                    text = if (isInstallment) {
+                        "Valor da parcela (R$)"
+                    } else {
+                        "Valor (R$)"
+                    }
+                )
             },
             placeholder = {
                 Text(text = "0,00")
@@ -115,7 +190,7 @@ fun BillCreationScreen(
             enabled = !uiState.isSaving
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = dueDay,
@@ -137,25 +212,60 @@ fun BillCreationScreen(
             enabled = !uiState.isSaving
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        if (isInstallment) {
+            Spacer(modifier = Modifier.height(10.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = isRecurring,
-                onCheckedChange = {
-                    isRecurring = it
+            OutlinedTextField(
+                value = currentInstallment,
+                onValueChange = { value ->
+                    currentInstallment = value.filter { character ->
+                        character.isDigit()
+                    }.take(3)
+
                     onClearFeedback()
                 },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text(text = "Parcela atual")
+                },
+                placeholder = {
+                    Text(text = "Ex.: 4")
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+                singleLine = true,
                 enabled = !uiState.isSaving
             )
 
-            Text(text = "Repetir esta conta nos próximos meses")
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = totalInstallments,
+                onValueChange = { value ->
+                    totalInstallments = value.filter { character ->
+                        character.isDigit()
+                    }.take(3)
+
+                    onClearFeedback()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text(text = "Total de parcelas")
+                },
+                placeholder = {
+                    Text(text = "Ex.: 12")
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+                singleLine = true,
+                enabled = !uiState.isSaving
+            )
         }
 
         uiState.errorMessage?.let { message ->
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = message,
@@ -167,12 +277,21 @@ fun BillCreationScreen(
 
         Button(
             onClick = {
-                onCreateBill(
-                    name,
-                    amount,
-                    dueDay,
-                    isRecurring
-                )
+                if (isInstallment) {
+                    onCreateInstallmentPlan(
+                        name,
+                        amount,
+                        dueDay,
+                        currentInstallment,
+                        totalInstallments
+                    )
+                } else {
+                    onCreateMonthlyBill(
+                        name,
+                        amount,
+                        dueDay
+                    )
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !uiState.isSaving
@@ -180,6 +299,8 @@ fun BillCreationScreen(
             Text(
                 text = if (uiState.isSaving) {
                     "Salvando..."
+                } else if (isInstallment) {
+                    "Criar parcelas"
                 } else {
                     "Salvar conta"
                 }

@@ -13,6 +13,9 @@ interface BillDao {
     @Insert
     suspend fun insert(bill: Bill): Long
 
+    @Insert
+    suspend fun insertAll(bills: List<Bill>): List<Long>
+
     @Update
     suspend fun update(bill: Bill)
 
@@ -25,7 +28,6 @@ interface BillDao {
         WHERE profileId = :profileId
           AND month = :month
           AND year = :year
-          AND isExcluded = 0
         ORDER BY isPaid ASC, dueDay ASC, name COLLATE NOCASE ASC
         """
     )
@@ -38,43 +40,9 @@ interface BillDao {
     @Query("SELECT * FROM bills WHERE id = :id LIMIT 1")
     suspend fun getById(id: Long): Bill?
 
-    @Query(
-        """
-        SELECT * FROM bills
-        WHERE recurringSeriesId = :seriesId
-          AND month = :month
-          AND year = :year
-        LIMIT 1
-        """
-    )
-    suspend fun getBySeriesAndMonth(
-        seriesId: Long,
-        month: Int,
-        year: Int
-    ): Bill?
-
     @Query("UPDATE bills SET isPaid = :isPaid WHERE id = :id")
     suspend fun updatePaidStatus(
         id: Long,
         isPaid: Boolean
-    )
-
-    @Query("UPDATE bills SET isExcluded = 1 WHERE id = :id")
-    suspend fun excludeFromMonth(id: Long)
-
-    @Query(
-        """
-        DELETE FROM bills
-        WHERE recurringSeriesId = :seriesId
-          AND (
-              year > :year
-              OR (year = :year AND month > :month)
-          )
-        """
-    )
-    suspend fun deleteFutureInstances(
-        seriesId: Long,
-        month: Int,
-        year: Int
     )
 }

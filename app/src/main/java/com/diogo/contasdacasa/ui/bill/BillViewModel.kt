@@ -21,6 +21,7 @@ data class BillUiState(
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val wasBillCreated: Boolean = false,
+    val wasBillUpdated: Boolean = false,
     val errorMessage: String? = null
 )
 
@@ -109,7 +110,6 @@ class BillViewModel(
                         dueDay = dueDay,
                         month = uiState.month,
                         year = uiState.year,
-                        isRecurring = isRecurring
                     )
                 )
 
@@ -133,6 +133,150 @@ class BillViewModel(
         }
     }
 
+
+
+    fun createInstallmentPlan(
+        name: String,
+        amountText: String,
+        dueDayText: String,
+        currentInstallmentText: String,
+        totalInstallmentsText: String
+    ) {
+        val profileId = uiState.profileId ?: return
+        val normalizedName = name.trim()
+        val amountInCents = parseAmountInCents(amountText)
+        val dueDay = dueDayText.toIntOrNull()
+        val currentInstallment = currentInstallmentText.toIntOrNull()
+        val totalInstallments = totalInstallmentsText.toIntOrNull()
+
+        when {
+            normalizedName.isBlank() -> {
+                showError("Informe o nome do financiamento.")
+                return
+            }
+
+            amountInCents == null || amountInCents <= 0 -> {
+                showError("Informe um valor de parcela válido.")
+                return
+            }
+
+            dueDay == null || dueDay !in 1..31 -> {
+                showError("Informe um vencimento entre 1 e 31.")
+                return
+            }
+
+            currentInstallment == null || currentInstallment < 1 -> {
+                showError("Informe uma parcela atual válida.")
+                return
+            }
+
+            totalInstallments == null ||
+                totalInstallments < currentInstallment -> {
+                showError("O total deve ser igual ou maior que a parcela atual.")
+                return
+            }
+
+            totalInstallments > 600 -> {
+                showError("O total não pode ultrapassar 600 parcelas.")
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                isSaving = true,
+                wasBillCreated = false,
+                errorMessage = null
+            )
+
+            try {
+                repository.createInstallmentPlan(
+                    profileId = profileId,
+                    name = normalizedName,
+                    amountInCents = amountInCents,
+                    dueDay = dueDay,
+                    currentInstallment = currentInstallment,
+                    totalInstallments = totalInstallments,
+                    startMonth = uiState.month,
+                    startYear = uiState.year
+                )
+
+                val bills = repository.getBills(
+                    profileId = profileId,
+                    month = uiState.month,
+                    year = uiState.year
+                )
+
+                uiState = uiState.copy(
+                    bills = bills,
+                    isSaving = false,
+                    wasBillCreated = true
+                )
+            } catch (_: Exception) {
+                uiState = uiState.copy(
+                    isSaving = false,
+                    errorMessage = "Não foi possível criar o financiamento."
+                )
+            }
+        }
+    }
+    fun updateBillDetails(
+        bill: Bill,
+        amountText: String,
+        dueDayText: String
+    ) {
+        val amountInCents = parseAmountInCents(amountText)
+        val dueDay = dueDayText.toIntOrNull()
+
+        when {
+            amountInCents == null || amountInCents <= 0 -> {
+                showError("Informe um valor válido.")
+                return
+            }
+
+            dueDay == null || dueDay !in 1..31 -> {
+                showError("Informe um vencimento entre 1 e 31.")
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                isSaving = true,
+                wasBillUpdated = false,
+                errorMessage = null
+            )
+
+            try {
+                repository.updateBill(
+                    bill.copy(
+                        amountInCents = amountInCents,
+                        dueDay = dueDay,
+                        requiresReview = false
+                    )
+                )
+
+                val profileId = uiState.profileId ?: return@launch
+
+                val bills = repository.getBills(
+                    profileId = profileId,
+                    month = uiState.month,
+                    year = uiState.year
+                )
+
+                uiState = uiState.copy(
+                    bills = bills,
+                    isSaving = false,
+                    wasBillUpdated = true
+                )
+            } catch (_: Exception) {
+                uiState = uiState.copy(
+                    isSaving = false,
+                    errorMessage = "Não foi possível atualizar a conta."
+                )
+            }
+        }
+    }
     fun togglePaid(bill: Bill) {
         viewModelScope.launch {
             try {
@@ -151,7 +295,7 @@ class BillViewModel(
     fun deleteBill(bill: Bill) {
         viewModelScope.launch {
             try {
-                repository.deleteBill(bill)
+                repository.deleteBillFromMonth(bill)
                 loadBills()
             } catch (_: Exception) {
                 showError("Não foi possível excluir a conta.")
@@ -159,9 +303,11 @@ class BillViewModel(
         }
     }
 
+
     fun clearFeedback() {
         uiState = uiState.copy(
             wasBillCreated = false,
+            wasBillUpdated = false,
             errorMessage = null
         )
     }
