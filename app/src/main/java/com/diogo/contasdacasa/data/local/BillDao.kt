@@ -40,6 +40,21 @@ interface BillDao {
     @Query("SELECT * FROM bills WHERE id = :id LIMIT 1")
     suspend fun getById(id: Long): Bill?
 
+    @Query(
+        """
+        SELECT * FROM bills
+        WHERE sourceBillId = :sourceBillId
+          AND month = :month
+          AND year = :year
+        LIMIT 1
+        """
+    )
+    suspend fun getCopiedBill(
+        sourceBillId: Long,
+        month: Int,
+        year: Int
+    ): Bill?
+
     @Query("UPDATE bills SET isPaid = :isPaid WHERE id = :id")
     suspend fun updatePaidStatus(
         id: Long,

@@ -23,6 +23,8 @@ import com.diogo.contasdacasa.data.repository.ProfileRepository
 import com.diogo.contasdacasa.ui.bill.BillCreationScreen
 import com.diogo.contasdacasa.ui.bill.BillEditScreen
 import com.diogo.contasdacasa.ui.bill.BillViewModel
+import com.diogo.contasdacasa.ui.bill.PrepareNextMonthScreen
+import com.diogo.contasdacasa.ui.bill.PrepareNextMonthScreen
 import com.diogo.contasdacasa.ui.profile.ProfileCreationScreen
 import com.diogo.contasdacasa.ui.profile.ProfileHomeScreen
 import com.diogo.contasdacasa.ui.profile.ProfileSelectionScreen
@@ -68,6 +70,10 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(false)
             }
 
+            var isPreparingNextMonth by rememberSaveable {
+                mutableStateOf(false)
+            }
+
             var editingBillId by rememberSaveable {
                 mutableStateOf<Long?>(null)
             }
@@ -105,6 +111,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+
+            LaunchedEffect(billUiState.wasNextMonthPrepared) {
+                if (billUiState.wasNextMonthPrepared) {
+                    isPreparingNextMonth = false
+                    billViewModel.clearFeedback()
+                }
+            }
+
+            LaunchedEffect(billUiState.wasNextMonthPrepared) {
+                if (billUiState.wasNextMonthPrepared) {
+                    isPreparingNextMonth = false
+                    billViewModel.clearFeedback()
+                }
+            }
             LaunchedEffect(billUiState.wasBillUpdated) {
                 if (billUiState.wasBillUpdated) {
                     editingBillId = null
@@ -128,6 +148,36 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
+                        selectedProfile != null && isPreparingNextMonth -> {
+                            PrepareNextMonthScreen(
+                                bills = billUiState.bills,
+                                sourceMonth = billUiState.month,
+                                sourceYear = billUiState.year,
+                                isSaving = billUiState.isSaving,
+                                errorMessage = billUiState.errorMessage,
+                                onConfirm = billViewModel::prepareNextMonth,
+                                onCancel = {
+                                    billViewModel.clearFeedback()
+                                    isPreparingNextMonth = false
+                                },
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
+                        selectedProfile != null && isPreparingNextMonth -> {
+                            PrepareNextMonthScreen(
+                                bills = billUiState.bills,
+                                sourceMonth = billUiState.month,
+                                sourceYear = billUiState.year,
+                                isSaving = billUiState.isSaving,
+                                errorMessage = billUiState.errorMessage,
+                                onConfirm = billViewModel::prepareNextMonth,
+                                onCancel = {
+                                    billViewModel.clearFeedback()
+                                    isPreparingNextMonth = false
+                                },
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
                         selectedProfile != null && editingBill != null -> {
                             BillEditScreen(
                                 bill = editingBill,
@@ -177,6 +227,10 @@ class MainActivity : ComponentActivity() {
                                 onNextMonth = {
                                     billViewModel.changeMonth(1)
                                 },
+                                onPrepareNextMonth = {
+                                    billViewModel.clearFeedback()
+                                    isPreparingNextMonth = true
+                                },
                                 onAddBill = {
                                     billViewModel.clearFeedback()
                                     isCreatingBill = true
@@ -189,6 +243,7 @@ class MainActivity : ComponentActivity() {
                                 onDeleteBill = billViewModel::deleteBill,
                                 onChangeProfile = {
                                     isCreatingBill = false
+                                    isPreparingNextMonth = false
                                     editingBillId = null
                                     selectedProfileId = null
                                 },

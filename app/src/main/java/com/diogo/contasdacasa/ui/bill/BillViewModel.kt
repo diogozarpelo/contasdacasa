@@ -22,6 +22,7 @@ data class BillUiState(
     val isSaving: Boolean = false,
     val wasBillCreated: Boolean = false,
     val wasBillUpdated: Boolean = false,
+    val wasNextMonthPrepared: Boolean = false,
     val errorMessage: String? = null
 )
 
@@ -220,6 +221,52 @@ class BillViewModel(
             }
         }
     }
+
+    fun prepareNextMonth(
+        selectedBills: List<Bill>,
+        copyDetailsIds: Set<Long>
+    ) {
+        val profileId = uiState.profileId ?: return
+
+        if (selectedBills.isEmpty()) {
+            showError("Selecione pelo menos uma conta.")
+            return
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                isSaving = true,
+                wasNextMonthPrepared = false,
+                errorMessage = null
+            )
+
+            try {
+                val targetMonth = repository.prepareNextMonth(
+                    sourceBills = selectedBills,
+                    copyDetailsIds = copyDetailsIds
+                ) ?: return@launch
+
+                val bills = repository.getBills(
+                    profileId = profileId,
+                    month = targetMonth.monthValue,
+                    year = targetMonth.year
+                )
+
+                uiState = uiState.copy(
+                    month = targetMonth.monthValue,
+                    year = targetMonth.year,
+                    bills = bills,
+                    isSaving = false,
+                    wasNextMonthPrepared = true
+                )
+            } catch (_: Exception) {
+                uiState = uiState.copy(
+                    isSaving = false,
+                    errorMessage = "Não foi possível preparar o próximo mês."
+                )
+            }
+        }
+    }
     fun updateBillDetails(
         bill: Bill,
         amountText: String,
@@ -308,6 +355,7 @@ class BillViewModel(
         uiState = uiState.copy(
             wasBillCreated = false,
             wasBillUpdated = false,
+            wasNextMonthPrepared = false,
             errorMessage = null
         )
     }

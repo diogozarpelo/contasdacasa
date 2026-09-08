@@ -45,6 +45,7 @@ fun ProfileHomeScreen(
     errorMessage: String?,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
+    onPrepareNextMonth: () -> Unit,
     onAddBill: () -> Unit,
     onEditBill: (Bill) -> Unit,
     onTogglePaid: (Bill) -> Unit,
@@ -260,7 +261,19 @@ fun ProfileHomeScreen(
             onClick = onAddBill,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Adicionar conta")
+            Text(text = "Adicionar lançamento")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = onPrepareNextMonth,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = bills.any { bill ->
+                bill.entryType == "MONTHLY"
+            }
+        ) {
+            Text(text = "Preparar próximo mês")
         }
 
         Spacer(modifier = Modifier.height(8.dp))

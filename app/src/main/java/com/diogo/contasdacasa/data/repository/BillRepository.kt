@@ -48,6 +48,57 @@ class BillRepository(
         billDao.insertAll(installments)
     }
 
+    suspend fun prepareNextMonth(
+        sourceBills: List<Bill>,
+        copyDetailsIds: Set<Long>
+    ): YearMonth? {
+        val firstBill = sourceBills.firstOrNull() ?: return null
+
+        val targetMonth = YearMonth
+            .of(firstBill.year, firstBill.month)
+            .plusMonths(1)
+
+        sourceBills
+            .filter { bill ->
+                bill.entryType == "MONTHLY"
+            }
+            .forEach { sourceBill ->
+                val existingCopy = billDao.getCopiedBill(
+                    sourceBillId = sourceBill.id,
+                    month = targetMonth.monthValue,
+                    year = targetMonth.year
+                )
+
+                if (existingCopy == null) {
+                    val shouldCopyDetails = sourceBill.id in copyDetailsIds
+
+                    billDao.insert(
+                        Bill(
+                            profileId = sourceBill.profileId,
+                            name = sourceBill.name,
+                            amountInCents = if (shouldCopyDetails) {
+                                sourceBill.amountInCents
+                            } else {
+                                0
+                            },
+                            dueDay = if (shouldCopyDetails) {
+                                sourceBill.dueDay
+                            } else {
+                                0
+                            },
+                            month = targetMonth.monthValue,
+                            year = targetMonth.year,
+                            requiresReview = !shouldCopyDetails,
+                            entryType = "MONTHLY",
+                            sourceBillId = sourceBill.id
+                        )
+                    )
+                }
+            }
+
+        return targetMonth
+    }
+
     suspend fun getBills(
         profileId: Long,
         month: Int,
