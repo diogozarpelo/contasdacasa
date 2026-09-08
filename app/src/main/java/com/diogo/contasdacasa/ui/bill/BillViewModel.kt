@@ -324,6 +324,81 @@ class BillViewModel(
             }
         }
     }
+
+    fun updateInstallmentsFromCurrent(
+        bill: Bill,
+        amountText: String,
+        dueDayText: String
+    ) {
+        val amountInCents = parseAmountInCents(amountText)
+        val dueDay = dueDayText.toIntOrNull()
+
+        when {
+            amountInCents == null || amountInCents <= 0 -> {
+                showError("Informe um valor válido.")
+                return
+            }
+
+            dueDay == null || dueDay !in 1..31 -> {
+                showError("Informe um vencimento entre 1 e 31.")
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                isSaving = true,
+                wasBillUpdated = false,
+                errorMessage = null
+            )
+
+            try {
+                repository.updateInstallmentsFromCurrent(
+                    bill = bill,
+                    amountInCents = amountInCents,
+                    dueDay = dueDay
+                )
+
+                reloadCurrentMonthAfterChange(
+                    wasBillUpdated = true
+                )
+            } catch (_: Exception) {
+                uiState = uiState.copy(
+                    isSaving = false,
+                    errorMessage = "Não foi possível atualizar as parcelas."
+                )
+            }
+        }
+    }
+
+    fun deleteInstallmentsFromCurrent(bill: Bill) {
+        viewModelScope.launch {
+            try {
+                repository.deleteInstallmentsFromCurrent(bill)
+                loadBills()
+            } catch (_: Exception) {
+                showError("Não foi possível excluir as parcelas.")
+            }
+        }
+    }
+
+    private suspend fun reloadCurrentMonthAfterChange(
+        wasBillUpdated: Boolean
+    ) {
+        val profileId = uiState.profileId ?: return
+
+        val bills = repository.getBills(
+            profileId = profileId,
+            month = uiState.month,
+            year = uiState.year
+        )
+
+        uiState = uiState.copy(
+            bills = bills,
+            isSaving = false,
+            wasBillUpdated = wasBillUpdated
+        )
+    }
     fun togglePaid(bill: Bill) {
         viewModelScope.launch {
             try {

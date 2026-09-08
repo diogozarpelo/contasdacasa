@@ -125,6 +125,32 @@ class BillRepository(
         )
     }
 
+
+    suspend fun updateInstallmentsFromCurrent(
+        bill: Bill,
+        amountInCents: Long,
+        dueDay: Int
+    ) {
+        val groupId = bill.installmentGroupId ?: return
+        val installmentNumber = bill.installmentNumber ?: return
+
+        billDao.updateInstallmentsFrom(
+            groupId = groupId,
+            fromInstallment = installmentNumber,
+            amountInCents = amountInCents,
+            dueDay = dueDay
+        )
+    }
+
+    suspend fun deleteInstallmentsFromCurrent(bill: Bill) {
+        val groupId = bill.installmentGroupId ?: return
+        val installmentNumber = bill.installmentNumber ?: return
+
+        billDao.deleteInstallmentsFrom(
+            groupId = groupId,
+            fromInstallment = installmentNumber
+        )
+    }
     suspend fun deleteBillFromMonth(bill: Bill) {
         billDao.delete(bill)
     }

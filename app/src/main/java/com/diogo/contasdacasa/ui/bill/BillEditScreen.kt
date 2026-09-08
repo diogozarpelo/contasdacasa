@@ -28,6 +28,7 @@ fun BillEditScreen(
     bill: Bill,
     uiState: BillUiState,
     onSave: (Bill, String, String) -> Unit,
+    onSaveFromCurrent: (Bill, String, String) -> Unit,
     onClearFeedback: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
@@ -55,13 +56,15 @@ fun BillEditScreen(
         )
     }
 
+    val isInstallment = bill.entryType == "INSTALLMENT"
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(24.dp)
     ) {
         Text(
-            text = "Editar conta",
+            text = "Editar lançamento",
             style = MaterialTheme.typography.headlineLarge
         )
 
@@ -71,6 +74,17 @@ fun BillEditScreen(
             text = bill.name,
             style = MaterialTheme.typography.titleLarge
         )
+
+        if (
+            isInstallment &&
+            bill.installmentNumber != null &&
+            bill.totalInstallments != null
+        ) {
+            Text(
+                text = "Parcela ${bill.installmentNumber} de ${bill.totalInstallments}",
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -83,9 +97,6 @@ fun BillEditScreen(
             modifier = Modifier.fillMaxWidth(),
             label = {
                 Text(text = "Valor (R$)")
-            },
-            placeholder = {
-                Text(text = "0,00")
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
@@ -139,12 +150,30 @@ fun BillEditScreen(
             enabled = !uiState.isSaving
         ) {
             Text(
-                text = if (uiState.isSaving) {
-                    "Salvando..."
+                text = if (isInstallment) {
+                    "Salvar somente esta parcela"
                 } else {
                     "Salvar alterações"
                 }
             )
+        }
+
+        if (isInstallment) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = {
+                    onSaveFromCurrent(
+                        bill,
+                        amount,
+                        dueDay
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isSaving
+            ) {
+                Text(text = "Salvar nesta e nas próximas")
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))

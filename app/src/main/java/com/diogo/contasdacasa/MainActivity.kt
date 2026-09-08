@@ -183,6 +183,7 @@ class MainActivity : ComponentActivity() {
                                 bill = editingBill,
                                 uiState = billUiState,
                                 onSave = billViewModel::updateBillDetails,
+                                onSaveFromCurrent = billViewModel::updateInstallmentsFromCurrent,
                                 onClearFeedback = billViewModel::clearFeedback,
                                 onCancel = {
                                     billViewModel.clearFeedback()
@@ -241,6 +242,8 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onTogglePaid = billViewModel::togglePaid,
                                 onDeleteBill = billViewModel::deleteBill,
+                                onDeleteInstallmentsFromCurrent =
+                                    billViewModel::deleteInstallmentsFromCurrent,
                                 onChangeProfile = {
                                     isCreatingBill = false
                                     isPreparingNextMonth = false

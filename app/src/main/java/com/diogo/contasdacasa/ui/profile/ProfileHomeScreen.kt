@@ -50,6 +50,7 @@ fun ProfileHomeScreen(
     onEditBill: (Bill) -> Unit,
     onTogglePaid: (Bill) -> Unit,
     onDeleteBill: (Bill) -> Unit,
+    onDeleteInstallmentsFromCurrent: (Bill) -> Unit,
     onChangeProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -297,29 +298,47 @@ fun ProfileHomeScreen(
             text = {
                 Text(
                     text = if (bill.entryType == "INSTALLMENT") {
-                        "A parcela ${bill.installmentNumber} de ${bill.totalInstallments} será excluída somente deste mês."
+                        "Escolha se deseja excluir somente esta parcela ou também as seguintes."
                     } else {
                         "A conta ${bill.name} será excluída deste mês."
                     }
                 )
             },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDeleteBill(bill)
-                        billPendingDeletion = null
+                Column {
+                    TextButton(
+                        onClick = {
+                            onDeleteBill(bill)
+                            billPendingDeletion = null
+                        }
+                    ) {
+                        Text(
+                            text = if (bill.entryType == "INSTALLMENT") {
+                                "Excluir somente esta parcela"
+                            } else {
+                                "Excluir"
+                            }
+                        )
                     }
-                ) {
-                    Text(text = "Excluir")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        billPendingDeletion = null
+
+                    if (bill.entryType == "INSTALLMENT") {
+                        TextButton(
+                            onClick = {
+                                onDeleteInstallmentsFromCurrent(bill)
+                                billPendingDeletion = null
+                            }
+                        ) {
+                            Text(text = "Excluir esta e as próximas")
+                        }
                     }
-                ) {
-                    Text(text = "Cancelar")
+
+                    TextButton(
+                        onClick = {
+                            billPendingDeletion = null
+                        }
+                    ) {
+                        Text(text = "Cancelar")
+                    }
                 }
             }
         )

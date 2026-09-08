@@ -60,4 +60,33 @@ interface BillDao {
         id: Long,
         isPaid: Boolean
     )
+
+    @Query(
+        """
+        UPDATE bills
+        SET amountInCents = :amountInCents,
+            dueDay = :dueDay,
+            requiresReview = 0
+        WHERE installmentGroupId = :groupId
+          AND installmentNumber >= :fromInstallment
+        """
+    )
+    suspend fun updateInstallmentsFrom(
+        groupId: String,
+        fromInstallment: Int,
+        amountInCents: Long,
+        dueDay: Int
+    )
+
+    @Query(
+        """
+        DELETE FROM bills
+        WHERE installmentGroupId = :groupId
+          AND installmentNumber >= :fromInstallment
+        """
+    )
+    suspend fun deleteInstallmentsFrom(
+        groupId: String,
+        fromInstallment: Int
+    )
 }
