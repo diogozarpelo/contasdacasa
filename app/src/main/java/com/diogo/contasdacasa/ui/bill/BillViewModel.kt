@@ -71,7 +71,6 @@ class BillViewModel(
         name: String,
         amountText: String,
         dueDayText: String,
-        isRecurring: Boolean
     ) {
         val profileId = uiState.profileId ?: return
         val normalizedName = name.trim()

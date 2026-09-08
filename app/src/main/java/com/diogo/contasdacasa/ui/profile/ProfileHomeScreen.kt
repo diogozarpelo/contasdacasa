@@ -60,7 +60,7 @@ fun ProfileHomeScreen(
 
     val monthName = Month
         .of(month)
-        .getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
+        .getDisplayName(TextStyle.FULL, Locale.forLanguageTag("pt-BR"))
         .replaceFirstChar { character ->
             character.uppercase()
         }
@@ -348,6 +348,6 @@ private fun formatCurrency(amountInCents: Long): String {
     val amount = BigDecimal(amountInCents).movePointLeft(2)
 
     return NumberFormat
-        .getCurrencyInstance(Locale("pt", "BR"))
+        .getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
         .format(amount)
 }

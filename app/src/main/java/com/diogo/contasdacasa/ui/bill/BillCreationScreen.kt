@@ -71,7 +71,7 @@ fun BillCreationScreen(
 
     val monthName = Month
         .of(uiState.month)
-        .getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
+        .getDisplayName(TextStyle.FULL, Locale.forLanguageTag("pt-BR"))
         .replaceFirstChar { character ->
             character.uppercase()
         }

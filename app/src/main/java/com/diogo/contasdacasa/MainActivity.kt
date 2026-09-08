@@ -201,7 +201,6 @@ class MainActivity : ComponentActivity() {
                                         name = name,
                                         amountText = amount,
                                         dueDayText = dueDay,
-                                        isRecurring = false
                                     )
                                 },
                                 onCreateInstallmentPlan = billViewModel::createInstallmentPlan,

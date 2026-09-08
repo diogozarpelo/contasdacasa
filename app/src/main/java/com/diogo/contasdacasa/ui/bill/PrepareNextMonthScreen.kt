@@ -66,7 +66,7 @@ fun PrepareNextMonthScreen(
 
     val targetMonthName = Month
         .of(targetMonth.monthValue)
-        .getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
+        .getDisplayName(TextStyle.FULL, Locale.forLanguageTag("pt-BR"))
         .replaceFirstChar { character ->
             character.uppercase()
         }
