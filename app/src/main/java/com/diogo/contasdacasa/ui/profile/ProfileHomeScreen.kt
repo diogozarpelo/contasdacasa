@@ -43,11 +43,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.diogo.contasdacasa.data.model.Bill
 import com.diogo.contasdacasa.data.model.Profile
-import java.math.BigDecimal
-import java.text.NumberFormat
-import java.time.Month
-import java.time.format.TextStyle
-import java.util.Locale
+import com.diogo.contasdacasa.ui.util.formatCurrency
+import com.diogo.contasdacasa.ui.util.formatMonthName
 
 @Composable
 fun ProfileHomeScreen(
@@ -76,12 +73,7 @@ fun ProfileHomeScreen(
         mutableStateOf(true)
     }
 
-    val monthName = Month
-        .of(month)
-        .getDisplayName(TextStyle.FULL, Locale.forLanguageTag("pt-BR"))
-        .replaceFirstChar { character ->
-            character.uppercase()
-        }
+    val monthName = formatMonthName(month)
 
     val totalInCents = bills.sumOf { bill ->
         bill.amountInCents
@@ -818,12 +810,4 @@ private fun DeleteBillDialog(
             }
         }
     )
-}
-
-private fun formatCurrency(amountInCents: Long): String {
-    val amount = BigDecimal(amountInCents).movePointLeft(2)
-
-    return NumberFormat
-        .getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
-        .format(amount)
 }

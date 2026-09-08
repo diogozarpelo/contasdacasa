@@ -24,9 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import java.time.Month
-import java.time.format.TextStyle
-import java.util.Locale
+import com.diogo.contasdacasa.ui.util.formatMonthName
 
 @Composable
 fun BillCreationScreen(
@@ -69,12 +67,7 @@ fun BillCreationScreen(
 
     val isInstallment = entryType == "INSTALLMENT"
 
-    val monthName = Month
-        .of(uiState.month)
-        .getDisplayName(TextStyle.FULL, Locale.forLanguageTag("pt-BR"))
-        .replaceFirstChar { character ->
-            character.uppercase()
-        }
+    val monthName = formatMonthName(uiState.month)
 
     Column(
         modifier = modifier

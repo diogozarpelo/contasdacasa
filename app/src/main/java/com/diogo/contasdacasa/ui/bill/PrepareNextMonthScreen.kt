@@ -24,10 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.diogo.contasdacasa.data.model.Bill
-import java.time.Month
+import com.diogo.contasdacasa.ui.util.formatMonthName
 import java.time.YearMonth
-import java.time.format.TextStyle
-import java.util.Locale
 
 @Composable
 fun PrepareNextMonthScreen(
@@ -64,12 +62,7 @@ fun PrepareNextMonthScreen(
         .of(sourceYear, sourceMonth)
         .plusMonths(1)
 
-    val targetMonthName = Month
-        .of(targetMonth.monthValue)
-        .getDisplayName(TextStyle.FULL, Locale.forLanguageTag("pt-BR"))
-        .replaceFirstChar { character ->
-            character.uppercase()
-        }
+    val targetMonthName = formatMonthName(targetMonth.monthValue)
 
     Column(
         modifier = modifier
