@@ -76,23 +76,16 @@ class BillViewModel(
         val amountInCents = parseCurrencyToCents(amountText)
         val dueDay = dueDayText.toIntOrNull()
 
-        when {
-            normalizedName.isBlank() -> {
-                showError("Informe o nome da conta.")
-                return
-            }
+        val validationError = BillInputValidator.validateMonthlyBill(
+            name = normalizedName,
+            amountInCents = requireNotNull(amountInCents),
+            dueDay = dueDay
+        )
 
-            amountInCents == null || amountInCents <= 0 -> {
-                showError("Informe um valor válido.")
-                return
-            }
-
-            dueDay == null || dueDay !in 1..31 -> {
-                showError("Informe um vencimento entre 1 e 31.")
-                return
-            }
+        if (validationError != null) {
+            showError(validationError)
+            return
         }
-
         viewModelScope.launch {
             uiState = uiState.copy(
                 isSaving = true,
@@ -105,8 +98,8 @@ class BillViewModel(
                     Bill(
                         profileId = profileId,
                         name = normalizedName,
-                        amountInCents = amountInCents,
-                        dueDay = dueDay,
+                        amountInCents = requireNotNull(amountInCents),
+                        dueDay = requireNotNull(dueDay),
                         month = uiState.month,
                         year = uiState.year,
                     )
@@ -148,39 +141,18 @@ class BillViewModel(
         val currentInstallment = currentInstallmentText.toIntOrNull()
         val totalInstallments = totalInstallmentsText.toIntOrNull()
 
-        when {
-            normalizedName.isBlank() -> {
-                showError("Informe o nome do financiamento.")
-                return
-            }
+        val validationError = BillInputValidator.validateInstallmentPlan(
+            name = normalizedName,
+            amountInCents = requireNotNull(amountInCents),
+            dueDay = requireNotNull(dueDay),
+            currentInstallment = requireNotNull(currentInstallment),
+            totalInstallments = totalInstallments
+        )
 
-            amountInCents == null || amountInCents <= 0 -> {
-                showError("Informe um valor de parcela válido.")
-                return
-            }
-
-            dueDay == null || dueDay !in 1..31 -> {
-                showError("Informe um vencimento entre 1 e 31.")
-                return
-            }
-
-            currentInstallment == null || currentInstallment < 1 -> {
-                showError("Informe uma parcela atual válida.")
-                return
-            }
-
-            totalInstallments == null ||
-                totalInstallments < currentInstallment -> {
-                showError("O total deve ser igual ou maior que a parcela atual.")
-                return
-            }
-
-            totalInstallments > 600 -> {
-                showError("O total não pode ultrapassar 600 parcelas.")
-                return
-            }
+        if (validationError != null) {
+            showError(validationError)
+            return
         }
-
         viewModelScope.launch {
             uiState = uiState.copy(
                 isSaving = true,
@@ -192,10 +164,10 @@ class BillViewModel(
                 repository.createInstallmentPlan(
                     profileId = profileId,
                     name = normalizedName,
-                    amountInCents = amountInCents,
-                    dueDay = dueDay,
-                    currentInstallment = currentInstallment,
-                    totalInstallments = totalInstallments,
+                    amountInCents = requireNotNull(amountInCents),
+                    dueDay = requireNotNull(dueDay),
+                    currentInstallment = requireNotNull(currentInstallment),
+                    totalInstallments = requireNotNull(totalInstallments),
                     startMonth = uiState.month,
                     startYear = uiState.year
                 )
