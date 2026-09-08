@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +28,8 @@ fun ProfileCreationScreen(
     uiState: ProfileUiState,
     onCreateProfile: (String) -> Unit,
     onClearFeedback: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCancel: (() -> Unit)? = null
 ) {
     var name by rememberSaveable {
         mutableStateOf("")
@@ -86,14 +88,16 @@ fun ProfileCreationScreen(
             )
         }
 
-        uiState.createdProfileName?.let { profileName ->
-            Spacer(modifier = Modifier.height(20.dp))
+        onCancel?.let { cancel ->
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "Perfil de $profileName criado com sucesso!",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
+            OutlinedButton(
+                onClick = cancel,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isSaving
+            ) {
+                Text(text = "Cancelar")
+            }
         }
 
         uiState.errorMessage?.let { message ->
@@ -120,7 +124,7 @@ fun ProfileCreationScreen(
 private fun ProfileCreationScreenPreview() {
     ContasDaCasaTheme {
         ProfileCreationScreen(
-            uiState = ProfileUiState(),
+            uiState = ProfileUiState(isLoading = false),
             onCreateProfile = {},
             onClearFeedback = {}
         )

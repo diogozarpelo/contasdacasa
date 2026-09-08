@@ -6,11 +6,15 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.diogo.contasdacasa.data.model.Profile
 import com.diogo.contasdacasa.data.repository.ProfileRepository
 import kotlinx.coroutines.launch
 
 data class ProfileUiState(
+    val profiles: List<Profile> = emptyList(),
+    val isLoading: Boolean = true,
     val isSaving: Boolean = false,
+    val createdProfileId: Long? = null,
     val createdProfileName: String? = null,
     val errorMessage: String? = null
 )
@@ -22,6 +26,29 @@ class ProfileViewModel(
     var uiState by mutableStateOf(ProfileUiState())
         private set
 
+    init {
+        loadProfiles()
+    }
+
+    private fun loadProfiles() {
+        viewModelScope.launch {
+            try {
+                val profiles = repository.getAllProfiles()
+
+                uiState = uiState.copy(
+                    profiles = profiles,
+                    isLoading = false,
+                    errorMessage = null
+                )
+            } catch (_: Exception) {
+                uiState = uiState.copy(
+                    isLoading = false,
+                    errorMessage = "Não foi possível carregar os perfis."
+                )
+            }
+        }
+    }
+
     fun createProfile(name: String) {
         val normalizedName = name.trim()
 
@@ -30,16 +57,26 @@ class ProfileViewModel(
         }
 
         viewModelScope.launch {
-            uiState = ProfileUiState(isSaving = true)
+            uiState = uiState.copy(
+                isSaving = true,
+                createdProfileId = null,
+                createdProfileName = null,
+                errorMessage = null
+            )
 
             try {
-                repository.createProfile(normalizedName)
+                val profileId = repository.createProfile(normalizedName)
+                val profiles = repository.getAllProfiles()
 
-                uiState = ProfileUiState(
+                uiState = uiState.copy(
+                    profiles = profiles,
+                    isSaving = false,
+                    createdProfileId = profileId,
                     createdProfileName = normalizedName
                 )
             } catch (_: Exception) {
-                uiState = ProfileUiState(
+                uiState = uiState.copy(
+                    isSaving = false,
                     errorMessage = "Não foi possível criar o perfil."
                 )
             }
@@ -47,12 +84,11 @@ class ProfileViewModel(
     }
 
     fun clearFeedback() {
-        if (
-            uiState.createdProfileName != null ||
-            uiState.errorMessage != null
-        ) {
-            uiState = ProfileUiState()
-        }
+        uiState = uiState.copy(
+            createdProfileId = null,
+            createdProfileName = null,
+            errorMessage = null
+        )
     }
 
     class Factory(
