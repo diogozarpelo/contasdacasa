@@ -37,6 +37,7 @@
 <p align="center">
   <img src="docs/screenshots/04-next-month.png" alt="Seleção de contas para o próximo mês" width="320">
 </p>
+
 ## Sobre o projeto
 
 O **Contas da Casa** é um aplicativo Android nativo desenvolvido para facilitar o controle das despesas domésticas.
