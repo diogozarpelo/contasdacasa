@@ -91,7 +91,8 @@ fun PrepareNextMonthScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         if (monthlyBills.isNotEmpty()) {
-            OutlinedButton(
+            SelectAllBillsButton(
+                allSelected = selectedIds.size == monthlyBills.size,
                 onClick = {
                     selectedIds = if (
                         selectedIds.size == monthlyBills.size
@@ -104,21 +105,9 @@ fun PrepareNextMonthScreen(
                     }
 
                     copyDetailsIds = copyDetailsIds.intersect(selectedIds)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = if (
-                        selectedIds.size == monthlyBills.size
-                    ) {
-                        "Desmarcar todas"
-                    } else {
-                        "Selecionar todas"
-                    }
-                )
-            }
+                }
+            )
         }
-
         Spacer(modifier = Modifier.height(8.dp))
 
         LazyColumn(
@@ -133,70 +122,29 @@ fun PrepareNextMonthScreen(
                 val isSelected = bill.id in selectedIds
                 val shouldCopyDetails = bill.id in copyDetailsIds
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(12.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = isSelected,
-                                onCheckedChange = { checked ->
-                                    selectedIds = if (checked) {
-                                        selectedIds + bill.id
-                                    } else {
-                                        selectedIds - bill.id
-                                    }
-
-                                    if (!checked) {
-                                        copyDetailsIds =
-                                            copyDetailsIds - bill.id
-                                    }
-                                }
-                            )
-
-                            Text(
-                                text = bill.name,
-                                style = MaterialTheme.typography.titleMedium
-                            )
+                PrepareNextMonthBillCard(
+                    bill = bill,
+                    isSelected = isSelected,
+                    shouldCopyDetails = shouldCopyDetails,
+                    onSelectedChange = { checked ->
+                        selectedIds = if (checked) {
+                            selectedIds + bill.id
+                        } else {
+                            selectedIds - bill.id
                         }
 
-                        if (isSelected) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = shouldCopyDetails,
-                                    onCheckedChange = { checked ->
-                                        copyDetailsIds = if (checked) {
-                                            copyDetailsIds + bill.id
-                                        } else {
-                                            copyDetailsIds - bill.id
-                                        }
-                                    }
-                                )
-
-                                Text(
-                                    text = "Copiar também valor e vencimento"
-                                )
-                            }
-
-                            if (!shouldCopyDetails) {
-                                Text(
-                                    text = "Valor e vencimento ficarão pendentes.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
+                        if (!checked) {
+                            copyDetailsIds = copyDetailsIds - bill.id
+                        }
+                    },
+                    onCopyDetailsChange = { checked ->
+                        copyDetailsIds = if (checked) {
+                            copyDetailsIds + bill.id
+                        } else {
+                            copyDetailsIds - bill.id
                         }
                     }
-                }
-            }
+                )            }
         }
 
         errorMessage?.let { message ->
