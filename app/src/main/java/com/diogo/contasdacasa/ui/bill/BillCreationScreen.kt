@@ -1,28 +1,21 @@
 package com.diogo.contasdacasa.ui.bill
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.diogo.contasdacasa.ui.util.formatMonthName
 
@@ -88,175 +81,49 @@ fun BillCreationScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = "Tipo de lançamento",
-            style = MaterialTheme.typography.titleMedium
+        BillEntryTypeSelector(
+            isInstallment = isInstallment,
+            onMonthlySelected = {
+                entryType = "MONTHLY"
+                onClearFeedback()
+            },
+            onInstallmentSelected = {
+                entryType = "INSTALLMENT"
+                onClearFeedback()
+            }
         )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    entryType = "MONTHLY"
-                    onClearFeedback()
-                },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = !isInstallment,
-                onClick = {
-                    entryType = "MONTHLY"
-                    onClearFeedback()
-                }
-            )
-
-            Text(text = "Conta mensal")
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    entryType = "INSTALLMENT"
-                    onClearFeedback()
-                },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = isInstallment,
-                onClick = {
-                    entryType = "INSTALLMENT"
-                    onClearFeedback()
-                }
-            )
-
-            Text(text = "Empréstimo ou financiamento")
-        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(
-            value = name,
-            onValueChange = {
-                name = it
+        BillCreationFields(
+            isInstallment = isInstallment,
+            name = name,
+            amount = amount,
+            dueDay = dueDay,
+            currentInstallment = currentInstallment,
+            totalInstallments = totalInstallments,
+            isSaving = uiState.isSaving,
+            onNameChange = { value ->
+                name = value
                 onClearFeedback()
             },
-            modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text(
-                    text = if (isInstallment) {
-                        "Nome do financiamento"
-                    } else {
-                        "Nome da conta"
-                    }
-                )
-            },
-            singleLine = true,
-            enabled = !uiState.isSaving
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = amount,
-            onValueChange = {
-                amount = it
+            onAmountChange = { value ->
+                amount = value
                 onClearFeedback()
             },
-            modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text(
-                    text = if (isInstallment) {
-                        "Valor da parcela (R$)"
-                    } else {
-                        "Valor (R$)"
-                    }
-                )
-            },
-            placeholder = {
-                Text(text = "0,00")
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal
-            ),
-            singleLine = true,
-            enabled = !uiState.isSaving
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = dueDay,
-            onValueChange = { value ->
-                dueDay = value.filter { character ->
-                    character.isDigit()
-                }.take(2)
-
+            onDueDayChange = { value ->
+                dueDay = value
                 onClearFeedback()
             },
-            modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text(text = "Dia do vencimento")
+            onCurrentInstallmentChange = { value ->
+                currentInstallment = value
+                onClearFeedback()
             },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            ),
-            singleLine = true,
-            enabled = !uiState.isSaving
+            onTotalInstallmentsChange = { value ->
+                totalInstallments = value
+                onClearFeedback()
+            }
         )
-
-        if (isInstallment) {
-            Spacer(modifier = Modifier.height(10.dp))
-
-            OutlinedTextField(
-                value = currentInstallment,
-                onValueChange = { value ->
-                    currentInstallment = value.filter { character ->
-                        character.isDigit()
-                    }.take(3)
-
-                    onClearFeedback()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                label = {
-                    Text(text = "Parcela atual")
-                },
-                placeholder = {
-                    Text(text = "Ex.: 4")
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number
-                ),
-                singleLine = true,
-                enabled = !uiState.isSaving
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            OutlinedTextField(
-                value = totalInstallments,
-                onValueChange = { value ->
-                    totalInstallments = value.filter { character ->
-                        character.isDigit()
-                    }.take(3)
-
-                    onClearFeedback()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                label = {
-                    Text(text = "Total de parcelas")
-                },
-                placeholder = {
-                    Text(text = "Ex.: 12")
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number
-                ),
-                singleLine = true,
-                enabled = !uiState.isSaving
-            )
-        }
-
         uiState.errorMessage?.let { message ->
             Spacer(modifier = Modifier.height(10.dp))
 
