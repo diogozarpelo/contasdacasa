@@ -67,10 +67,12 @@ Todos os dados são armazenados localmente no aparelho, sem necessidade de conex
 ### Organização das contas
 
 - filtro por todas, pendentes ou pagas;
-- cadastro de contas mensais;
-- edição de valor e vencimento;
-- exclusão de lançamentos;
-- marcação rápida de pagamento;
+- opção de ocultar e mostrar a lista de contas;
+- cards compactos e expansíveis para facilitar a visualização de listas maiores;
+- apenas uma conta expandida por vez;
+- cadastro de contas mensais mesmo quando o valor ainda não foi informado;
+- edição posterior de valor e vencimento;
+- ações de editar, excluir e alterar o status de pagamento disponíveis ao expandir a conta;
 - diferenciação visual entre contas pagas e pendentes.
 
 ### Financiamentos e parcelamentos
@@ -108,6 +110,7 @@ flowchart TD
 
 - cada perfil possui suas próprias contas;
 - contas mensais pertencem a um mês e ano específicos;
+- uma conta mensal pode ser cadastrada sem valor informado e preenchida posteriormente;
 - financiamentos geram parcelas nos meses correspondentes;
 - contas pagas aparecem depois das contas pendentes;
 - o resumo mensal é atualizado conforme o estado dos pagamentos;
@@ -204,9 +207,14 @@ O projeto foi validado por meio de:
 - compilação completa com Gradle;
 - verificação de lint;
 - testes dos fluxos de criação, edição e exclusão;
+- testes de cadastro de contas mensais sem valor informado;
+- testes de edição posterior do valor da conta;
 - testes de contas mensais e financiamentos;
 - testes de navegação entre meses;
 - testes de gerenciamento de perfis;
+- testes da lista de contas com ocultação e exibição;
+- testes dos cards compactos e expansíveis;
+- validação de apenas um card expandido por vez;
 - validação da persistência após fechar e abrir o aplicativo;
 - testes visuais em emulador Android.
 

@@ -11,7 +11,7 @@ object BillInputValidator {
             name.isBlank() ->
                 "Informe o nome da conta."
 
-            amountInCents == null || amountInCents <= 0 ->
+            amountInCents == null || amountInCents < 0 ->
                 "Informe um valor válido."
 
             dueDay == null || dueDay !in 1..31 ->

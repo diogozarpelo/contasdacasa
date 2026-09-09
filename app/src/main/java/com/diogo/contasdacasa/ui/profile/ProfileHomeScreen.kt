@@ -75,6 +75,14 @@ fun ProfileHomeScreen(
         mutableStateOf(BillFilter.ALL)
     }
 
+    var isAccountsVisible by remember {
+        mutableStateOf(true)
+    }
+
+    var expandedBillId by remember {
+        mutableStateOf<Long?>(null)
+    }
+
     val monthName = formatMonthName(month)
 
     val totalInCents = bills.sumOf { bill ->
@@ -148,14 +156,19 @@ fun ProfileHomeScreen(
             AccountsSectionHeader(
                 billCount = filteredBills.size,
                 selectedFilter = selectedFilter,
+                isAccountsVisible = isAccountsVisible,
                 onFilterSelected = { filter ->
                     selectedFilter = filter
+                },
+                onToggleAccountsVisibility = {
+                    isAccountsVisible = !isAccountsVisible
                 }
             )
         }
 
-        when {
-            isLoading -> {
+        if (isAccountsVisible) {
+            when {
+                isLoading -> {
                 item {
                     Box(
                         modifier = Modifier
@@ -204,6 +217,14 @@ fun ProfileHomeScreen(
                 ) { bill ->
                     BillCard(
                         bill = bill,
+                        isExpanded = expandedBillId == bill.id,
+                        onToggleExpanded = {
+                            expandedBillId = if (expandedBillId == bill.id) {
+                                null
+                            } else {
+                                bill.id
+                            }
+                        },
                         onTogglePaid = {
                             onTogglePaid(bill)
                         },
@@ -215,6 +236,7 @@ fun ProfileHomeScreen(
                         }
                     )
                 }
+            }
             }
         }
         item {

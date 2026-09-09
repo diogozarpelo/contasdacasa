@@ -73,12 +73,12 @@ class BillViewModel(
     ) {
         val profileId = uiState.profileId ?: return
         val normalizedName = name.trim()
-        val amountInCents = parseCurrencyToCents(amountText)
+        val amountInCents = parseCurrencyToCents(amountText) ?: 0L
         val dueDay = dueDayText.toIntOrNull()
 
         val validationError = BillInputValidator.validateMonthlyBill(
             name = normalizedName,
-            amountInCents = requireNotNull(amountInCents),
+            amountInCents = amountInCents,
             dueDay = dueDay
         )
 

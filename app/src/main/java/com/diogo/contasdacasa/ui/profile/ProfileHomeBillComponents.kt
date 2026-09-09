@@ -54,7 +54,9 @@ import com.diogo.contasdacasa.ui.util.formatMonthName
 internal fun AccountsSectionHeader(
     billCount: Int,
     selectedFilter: BillFilter,
-    onFilterSelected: (BillFilter) -> Unit
+    isAccountsVisible: Boolean,
+    onFilterSelected: (BillFilter) -> Unit,
+    onToggleAccountsVisibility: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -88,6 +90,17 @@ internal fun AccountsSectionHeader(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                TextButton(
+                    onClick = onToggleAccountsVisibility,
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    Text(
+                        text = if (isAccountsVisible) "Ocultar contas" else "Mostrar contas"
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -118,7 +131,7 @@ internal fun AccountsSectionHeader(
                         onFilterSelected(BillFilter.PENDING)
                     },
                     label = {
-                        Text(text = "Pendentes")
+                        Text(text = "Pendentes", maxLines = 1, softWrap = false, style = MaterialTheme.typography.labelMedium)
                     },
                     colors = FilterChipDefaults.filterChipColors(
                         containerColor = Color.White,
@@ -147,6 +160,8 @@ internal fun AccountsSectionHeader(
 @Composable
 internal fun BillCard(
     bill: Bill,
+    isExpanded: Boolean,
+    onToggleExpanded: () -> Unit,
     onTogglePaid: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
@@ -158,143 +173,155 @@ internal fun BillCard(
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggleExpanded),
         colors = CardDefaults.cardColors(
             containerColor = cardColor
         ),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(14.dp),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (bill.isPaid) 0.dp else 2.dp
+            defaultElevation = if (bill.isPaid) 0.dp else 1.dp
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(
+                horizontal = 14.dp,
+                vertical = 10.dp
+            )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = bill.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                Text(
+                    text = bill.name,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    Text(
-                        text = if (bill.amountInCents == 0L) {
-                            "Valor não informado"
-                        } else {
-                            formatCurrency(bill.amountInCents)
-                        },
-                        style = MaterialTheme.typography.titleLarge,
-                        color = if (bill.amountInCents == 0L) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        }
-                    )
-                }
+                Spacer(modifier = Modifier.size(8.dp))
 
                 PaymentStatusBadge(
                     isPaid = bill.isPaid
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = if (bill.dueDay == 0) {
-                    "Vencimento não informado"
-                } else {
-                    "Vencimento: dia ${bill.dueDay}"
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (bill.dueDay == 0) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
-            )
-
-            if (
-                bill.entryType == BillEntryType.INSTALLMENT &&
-                bill.installmentNumber != null &&
-                bill.totalInstallments != null
-            ) {
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Parcela ${bill.installmentNumber} de ${bill.totalInstallments}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(
-                    onClick = onEdit
-                ) {
-                    Text(text = "Editar")
-                }
+                Text(
+                    text = if (bill.amountInCents == 0L) {
+                        "Valor não informado"
+                    } else {
+                        formatCurrency(bill.amountInCents)
+                    },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (bill.amountInCents == 0L) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
 
-                TextButton(
-                    onClick = onDelete
+                Text(
+                    text = if (bill.dueDay == 0) {
+                        "Vencimento não informado"
+                    } else {
+                        "Vence dia ${bill.dueDay}"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (bill.dueDay == 0) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+
+            if (isExpanded) {
+                if (
+                    bill.entryType == BillEntryType.INSTALLMENT &&
+                    bill.installmentNumber != null &&
+                    bill.totalInstallments != null
                 ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
-                        text = "Excluir",
-                        color = MaterialTheme.colorScheme.error
+                        text = "Parcela ${bill.installmentNumber} de ${bill.totalInstallments}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                Surface(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .clip(CircleShape)
-                        .clickable(
-                            onClickLabel = if (bill.isPaid) {
-                                "Marcar como pendente"
-                            } else {
-                                "Marcar como paga"
-                            },
-                            onClick = onTogglePaid
-                        ),
-                    color = if (bill.isPaid) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.error
-                    },
-                    shape = CircleShape
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center
+                    TextButton(
+                        onClick = onEdit
+                    ) {
+                        Text(text = "Editar")
+                    }
+
+                    TextButton(
+                        onClick = onDelete
                     ) {
                         Text(
-                            text = "✓",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = if (bill.isPaid) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onError
-                            }
+                            text = "Excluir",
+                            color = MaterialTheme.colorScheme.error
                         )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Surface(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .clickable(
+                                onClickLabel = if (bill.isPaid) {
+                                    "Marcar como pendente"
+                                } else {
+                                    "Marcar como paga"
+                                },
+                                onClick = onTogglePaid
+                            ),
+                        color = if (bill.isPaid) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
+                        shape = CircleShape
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "✓",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = if (bill.isPaid) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onError
+                                }
+                            )
+                        }
                     }
                 }
             }
